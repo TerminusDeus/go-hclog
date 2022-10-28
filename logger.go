@@ -6,42 +6,13 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	hlog "github.com/hashicorp/go-hclog"
 )
 
 var (
 	// DefaultOutput is used as the default log output.
 	DefaultOutput io.Writer = os.Stderr
-
-	// DefaultLevel is used as the default log level.
-	DefaultLevel = Info
-)
-
-// Level represents a log level.
-type Level int32
-
-const (
-	// NoLevel is a special level used to indicate that no level has been
-	// set and allow for a default to be used.
-	NoLevel Level = 0
-
-	// Trace is the most verbose level. Intended to be used for the tracing
-	// of actions in code, such as function enters/exits, etc.
-	Trace Level = 1
-
-	// Debug information for programmer low-level analysis.
-	Debug Level = 2
-
-	// Info information about steady state operations.
-	Info Level = 3
-
-	// Warn information about rare but handled events.
-	Warn Level = 4
-
-	// Error information about unrecoverable events.
-	Error Level = 5
-
-	// Off disables all logging output.
-	Off Level = 6
 )
 
 // Format is a simple convenience type for when formatting is required. When
@@ -92,45 +63,24 @@ const (
 // LevelFromString returns a Level type for the named log level, or "NoLevel" if
 // the level string is invalid. This facilitates setting the log level via
 // config or environment variable by name in a predictable way.
-func LevelFromString(levelStr string) Level {
+func LevelFromString(levelStr string) hlog.Level {
 	// We don't care about case. Accept both "INFO" and "info".
 	levelStr = strings.ToLower(strings.TrimSpace(levelStr))
 	switch levelStr {
 	case "trace":
-		return Trace
+		return hlog.Trace
 	case "debug":
-		return Debug
+		return hlog.Debug
 	case "info":
-		return Info
+		return hlog.Info
 	case "warn":
-		return Warn
+		return hlog.Warn
 	case "error":
-		return Error
+		return hlog.Error
 	case "off":
-		return Off
+		return hlog.Off
 	default:
-		return NoLevel
-	}
-}
-
-func (l Level) String() string {
-	switch l {
-	case Trace:
-		return "trace"
-	case Debug:
-		return "debug"
-	case Info:
-		return "info"
-	case Warn:
-		return "warn"
-	case Error:
-		return "error"
-	case NoLevel:
-		return "none"
-	case Off:
-		return "off"
-	default:
-		return "unknown"
+		return hlog.NoLevel
 	}
 }
 
@@ -140,7 +90,7 @@ type Logger interface {
 	// keys must be strings
 	// vals can be any type, but display is implementation specific
 	// Emit a message and key/value pairs at a provided log level
-	Log(level Level, msg string, args ...interface{})
+	Log(level hlog.Level, msg string, args ...interface{})
 
 	// Emit a message and key/value pairs at the TRACE level
 	Trace(msg string, args ...interface{})
@@ -196,7 +146,7 @@ type Logger interface {
 	// Updates the level. This should affect all related loggers as well,
 	// unless they were created with IndependentLevels. If an
 	// implementation cannot update the level on the fly, it should no-op.
-	SetLevel(level Level)
+	SetLevel(level hlog.Level)
 
 	// Return a value that conforms to the stdlib log.Logger interface
 	StandardLogger(opts *StandardLoggerOptions) *log.Logger
@@ -226,7 +176,7 @@ type StandardLoggerOptions struct {
 	// the specified level. Similar to InferLevels, this will strip any level
 	// prefix contained in the logged string before applying the forced level.
 	// If set, this override InferLevels.
-	ForceLevel Level
+	ForceLevel hlog.Level
 }
 
 type TimeFunction = func() time.Time
@@ -237,7 +187,7 @@ type LoggerOptions struct {
 	Name string
 
 	// The threshold for the logger. Anything less severe is suppressed
-	Level Level
+	Level hlog.Level
 
 	// Where to write the logs to. Defaults to os.Stderr if nil
 	Output io.Writer
@@ -282,7 +232,7 @@ type LoggerOptions struct {
 	// should not be logged.
 	// This is useful when interacting with a system that you wish to suppress the log
 	// message for (because it's too noisy, etc)
-	Exclude func(level Level, msg string, args ...interface{}) bool
+	Exclude func(level hlog.Level, msg string, args ...interface{}) bool
 
 	// IndependentLevels causes subloggers to be created with an independent
 	// copy of this logger's level. This means that using SetLevel on this
@@ -327,7 +277,7 @@ type InterceptLogger interface {
 // SinkAdapter describes the interface that must be implemented
 // in order to Register a new sink to an InterceptLogger
 type SinkAdapter interface {
-	Accept(name string, level Level, msg string, args ...interface{})
+	Accept(name string, level hlog.Level, msg string, args ...interface{})
 }
 
 // Flushable represents a method for flushing an output buffer. It can be used

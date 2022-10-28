@@ -5,6 +5,8 @@ import (
 	"log"
 	"regexp"
 	"strings"
+
+	hlog "github.com/hashicorp/go-hclog"
 )
 
 // Regex to ignore characters commonly found in timestamp formats from the
@@ -18,7 +20,7 @@ type stdlogAdapter struct {
 	log                      Logger
 	inferLevels              bool
 	inferLevelsWithTimestamp bool
-	forceLevel               Level
+	forceLevel               hlog.Level
 }
 
 // Take the data, infer the levels if configured, and send it through
@@ -26,7 +28,7 @@ type stdlogAdapter struct {
 func (s *stdlogAdapter) Write(data []byte) (int, error) {
 	str := string(bytes.TrimRight(data, " \t\n"))
 
-	if s.forceLevel != NoLevel {
+	if s.forceLevel != hlog.NoLevel {
 		// Use pickLevel to strip log levels included in the line since we are
 		// forcing the level
 		_, str := s.pickLevel(str)
@@ -47,17 +49,17 @@ func (s *stdlogAdapter) Write(data []byte) (int, error) {
 	return len(data), nil
 }
 
-func (s *stdlogAdapter) dispatch(str string, level Level) {
+func (s *stdlogAdapter) dispatch(str string, level hlog.Level) {
 	switch level {
-	case Trace:
+	case hlog.Trace:
 		s.log.Trace(str)
-	case Debug:
+	case hlog.Debug:
 		s.log.Debug(str)
-	case Info:
+	case hlog.Info:
 		s.log.Info(str)
-	case Warn:
+	case hlog.Warn:
 		s.log.Warn(str)
-	case Error:
+	case hlog.Error:
 		s.log.Error(str)
 	default:
 		s.log.Info(str)
@@ -65,22 +67,22 @@ func (s *stdlogAdapter) dispatch(str string, level Level) {
 }
 
 // Detect, based on conventions, what log level this is.
-func (s *stdlogAdapter) pickLevel(str string) (Level, string) {
+func (s *stdlogAdapter) pickLevel(str string) (hlog.Level, string) {
 	switch {
 	case strings.HasPrefix(str, "[DEBUG]"):
-		return Debug, strings.TrimSpace(str[7:])
+		return hlog.Debug, strings.TrimSpace(str[7:])
 	case strings.HasPrefix(str, "[TRACE]"):
-		return Trace, strings.TrimSpace(str[7:])
+		return hlog.Trace, strings.TrimSpace(str[7:])
 	case strings.HasPrefix(str, "[INFO]"):
-		return Info, strings.TrimSpace(str[6:])
+		return hlog.Info, strings.TrimSpace(str[6:])
 	case strings.HasPrefix(str, "[WARN]"):
-		return Warn, strings.TrimSpace(str[6:])
+		return hlog.Warn, strings.TrimSpace(str[6:])
 	case strings.HasPrefix(str, "[ERROR]"):
-		return Error, strings.TrimSpace(str[7:])
+		return hlog.Error, strings.TrimSpace(str[7:])
 	case strings.HasPrefix(str, "[ERR]"):
-		return Error, strings.TrimSpace(str[5:])
+		return hlog.Error, strings.TrimSpace(str[5:])
 	default:
-		return Info, str
+		return hlog.Info, str
 	}
 }
 

@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	hlog "github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -388,7 +389,7 @@ func TestLogger(t *testing.T) {
 		rootLogger := New(&LoggerOptions{
 			Name:   "with_test",
 			Output: &buf,
-			Level:  Warn,
+			Level:  hlog.Warn,
 		})
 
 		// Build the root logger in two steps, which triggers a slice capacity increase
@@ -413,7 +414,7 @@ func TestLogger(t *testing.T) {
 			t.Fatalf("unexpected output: %s", output)
 		}
 
-		derived.SetLevel(Info)
+		derived.SetLevel(hlog.Info)
 
 		rootLogger.Info("root_test", "bird", 10)
 		output = buf.String()
@@ -556,7 +557,7 @@ func TestLogger(t *testing.T) {
 		logger := New(&LoggerOptions{
 			// No name!
 			Output:            &buf,
-			Level:             Off,
+			Level:             hlog.Off,
 			IndependentLevels: true,
 		})
 
@@ -569,7 +570,7 @@ func TestLogger(t *testing.T) {
 		buf.Reset()
 
 		another := logger.Named("sublogger")
-		another.SetLevel(Info)
+		another.SetLevel(hlog.Info)
 		another.Info("this is test")
 		str = buf.String()
 		dataIdx := strings.IndexByte(str, ' ')
@@ -592,7 +593,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 
 		logger := New(&LoggerOptions{
 			Name:   "test",
-			Output: NewLeveledWriter(&stdout, map[Level]io.Writer{Error: &stderr}),
+			Output: NewLeveledWriter(&stdout, map[hlog.Level]io.Writer{hlog.Error: &stderr}),
 		})
 
 		logger.Error("this is an error", "who", "programmer", "why", "testing")
@@ -610,7 +611,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 
 		logger := New(&LoggerOptions{
 			Name:   "test",
-			Output: NewLeveledWriter(&stdout, map[Level]io.Writer{Error: &stderr}),
+			Output: NewLeveledWriter(&stdout, map[hlog.Level]io.Writer{hlog.Error: &stderr}),
 		})
 
 		logger.Info("this is test", "who", "programmer", "why", "testing")
@@ -628,7 +629,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 
 		logger := New(&LoggerOptions{
 			Name:   "test",
-			Output: NewLeveledWriter(&stdout, map[Level]io.Writer{Error: &stderr}),
+			Output: NewLeveledWriter(&stdout, map[hlog.Level]io.Writer{hlog.Error: &stderr}),
 		})
 
 		logger.Info("this is test", "who", "programmer", "why", "testing")
@@ -665,7 +666,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "programmer", raw["who"])
 		assert.Equal(t, "testing is fun", raw["why"])
 	})
@@ -689,9 +690,9 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		val, ok := raw["@timestamp"]
+		val, ok := raw["timestamp"]
 		if !ok {
-			t.Fatal("missing '@timestamp' key")
+			t.Fatal("missing 'timestamp' key")
 		}
 
 		assert.Equal(t, val, time.Now().Format(time.Kitchen))
@@ -717,9 +718,9 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		val, ok := raw["@timestamp"]
+		val, ok := raw["timestamp"]
 		if !ok {
-			t.Fatal("missing '@timestamp' key")
+			t.Fatal("missing 'timestamp' key")
 		}
 
 		assert.Equal(t, val, time.Now().UTC().Format(time.Kitchen))
@@ -743,8 +744,8 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if val, ok := raw["@timestamp"]; ok {
-			t.Fatalf("got: '@timestamp' key (with value %v); want: no '@timestamp' key", val)
+		if val, ok := raw["timestamp"]; ok {
+			t.Fatalf("got: 'timestamp' key (with value %v); want: no 'timestamp' key", val)
 		}
 	})
 
@@ -766,7 +767,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "programmer", raw["who"])
 		assert.Equal(t, "testing is fun", raw["why"])
 		assert.Equal(t, "in the hat", raw["cat"])
@@ -792,7 +793,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "programmer", raw["who"])
 		assert.Equal(t, errMsg.Error(), raw["err"])
 	})
@@ -825,7 +826,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "programmer", raw["who"])
 		assert.Equal(t, expectedMsg, raw["err"])
 	})
@@ -855,7 +856,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "programmer", raw["who"])
 		assert.Equal(t, expectedMsg, raw["err"])
 	})
@@ -878,7 +879,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "12 beans/day", raw["production"])
 	})
 
@@ -900,7 +901,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, float64(12), raw["bytes"])
 		assert.Equal(t, float64(0755), raw["perms"])
 		assert.Equal(t, float64(5), raw["bits"])
@@ -942,7 +943,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "unquoted", raw["unquoted"])
 		assert.Equal(t, "quoted", raw["quoted"])
 		assert.Equal(t, "foo\nbar\bbaz\uFFFDa", raw["unsafe"])
@@ -970,8 +971,8 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
-		assert.Equal(t, fmt.Sprintf("%v:%d", file, line-1), raw["@caller"])
+		assert.Equal(t, "this is test", raw["message"])
+		assert.Equal(t, fmt.Sprintf("%v:%d", file, line-1), raw["caller"])
 	})
 
 	t.Run("includes the caller location excluding helper functions", func(t *testing.T) {
@@ -1000,8 +1001,8 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
-		assert.Equal(t, fmt.Sprintf("%v:%d", file, line-1), raw["@caller"])
+		assert.Equal(t, "this is test", raw["message"])
+		assert.Equal(t, fmt.Sprintf("%v:%d", file, line-1), raw["caller"])
 	})
 
 	t.Run("handles non-serializable entries", func(t *testing.T) {
@@ -1023,8 +1024,8 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
-		assert.Equal(t, errJsonUnsupportedTypeMsg, raw["@warn"])
+		assert.Equal(t, "this is test", raw["message"])
+		assert.Equal(t, errJsonUnsupportedTypeMsg, raw["warn"])
 	})
 
 	t.Run("omits the entry for the message when empty", func(t *testing.T) {

@@ -3,6 +3,8 @@ package hclog
 import (
 	"bytes"
 	"io"
+
+	hlog "github.com/hashicorp/go-hclog"
 )
 
 type writer struct {
@@ -15,7 +17,7 @@ func newWriter(w io.Writer, color ColorOption) *writer {
 	return &writer{w: w, color: color}
 }
 
-func (w *writer) Flush(level Level) (err error) {
+func (w *writer) Flush(level hlog.Level) (err error) {
 	var unwritten = w.b.Bytes()
 
 	if w.color != ColorOff {
@@ -46,21 +48,21 @@ func (w *writer) WriteString(s string) (int, error) {
 
 // LevelWriter is the interface that wraps the LevelWrite method.
 type LevelWriter interface {
-	LevelWrite(level Level, p []byte) (n int, err error)
+	LevelWrite(level hlog.Level, p []byte) (n int, err error)
 }
 
 // LeveledWriter writes all log messages to the standard writer,
 // except for log levels that are defined in the overrides map.
 type LeveledWriter struct {
 	standard  io.Writer
-	overrides map[Level]io.Writer
+	overrides map[hlog.Level]io.Writer
 }
 
 // NewLeveledWriter returns an initialized LeveledWriter.
 //
 // standard will be used as the default writer for all log levels,
 // except for log levels that are defined in the overrides map.
-func NewLeveledWriter(standard io.Writer, overrides map[Level]io.Writer) *LeveledWriter {
+func NewLeveledWriter(standard io.Writer, overrides map[hlog.Level]io.Writer) *LeveledWriter {
 	return &LeveledWriter{
 		standard:  standard,
 		overrides: overrides,
@@ -73,7 +75,7 @@ func (lw *LeveledWriter) Write(p []byte) (int, error) {
 }
 
 // LevelWrite implements LevelWriter.
-func (lw *LeveledWriter) LevelWrite(level Level, p []byte) (int, error) {
+func (lw *LeveledWriter) LevelWrite(level hlog.Level, p []byte) (int, error) {
 	w, ok := lw.overrides[level]
 	if !ok {
 		w = lw.standard

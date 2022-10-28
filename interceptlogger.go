@@ -5,6 +5,8 @@ import (
 	"log"
 	"sync"
 	"sync/atomic"
+
+	hlog "github.com/hashicorp/go-hclog"
 )
 
 var _ Logger = &interceptLogger{}
@@ -35,7 +37,7 @@ func NewInterceptLogger(opts *LoggerOptions) InterceptLogger {
 	return intercept
 }
 
-func (i *interceptLogger) Log(level Level, msg string, args ...interface{}) {
+func (i *interceptLogger) Log(level hlog.Level, msg string, args ...interface{}) {
 	i.log(level, msg, args...)
 }
 
@@ -43,7 +45,7 @@ func (i *interceptLogger) Log(level Level, msg string, args ...interface{}) {
 // all called Log then direct calls to Log would have a different stack frame
 // depth. By having all the methods call the same helper we ensure the stack
 // frame depth is the same.
-func (i *interceptLogger) log(level Level, msg string, args ...interface{}) {
+func (i *interceptLogger) log(level hlog.Level, msg string, args ...interface{}) {
 	i.Logger.Log(level, msg, args...)
 	if atomic.LoadInt32(i.sinkCount) == 0 {
 		return
@@ -58,27 +60,27 @@ func (i *interceptLogger) log(level Level, msg string, args ...interface{}) {
 
 // Emit the message and args at TRACE level to log and sinks
 func (i *interceptLogger) Trace(msg string, args ...interface{}) {
-	i.log(Trace, msg, args...)
+	i.log(hlog.Trace, msg, args...)
 }
 
 // Emit the message and args at DEBUG level to log and sinks
 func (i *interceptLogger) Debug(msg string, args ...interface{}) {
-	i.log(Debug, msg, args...)
+	i.log(hlog.Debug, msg, args...)
 }
 
 // Emit the message and args at INFO level to log and sinks
 func (i *interceptLogger) Info(msg string, args ...interface{}) {
-	i.log(Info, msg, args...)
+	i.log(hlog.Info, msg, args...)
 }
 
 // Emit the message and args at WARN level to log and sinks
 func (i *interceptLogger) Warn(msg string, args ...interface{}) {
-	i.log(Warn, msg, args...)
+	i.log(hlog.Warn, msg, args...)
 }
 
 // Emit the message and args at ERROR level to log and sinks
 func (i *interceptLogger) Error(msg string, args ...interface{}) {
-	i.log(Error, msg, args...)
+	i.log(hlog.Error, msg, args...)
 }
 
 func (i *interceptLogger) retrieveImplied(args ...interface{}) []interface{} {

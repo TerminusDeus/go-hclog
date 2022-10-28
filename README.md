@@ -22,7 +22,7 @@ and promised through future versions.
 
 ## Installation and Docs
 
-Install using `go get github.com/hashicorp/go-hclog`.
+Install using `go get github.com/TerminusDeus/go-hclog`.
 
 Full documentation is available at
 http://godoc.org/github.com/hashicorp/go-hclog
