@@ -781,7 +781,11 @@ func (l *intLogger) With(args ...interface{}) Logger {
 
 // Create a new sub-Logger that a name decending from the current name.
 // This is used to create a subsystem specific Logger.
-func (l *intLogger) Named(name string) Logger {
+func (l *intLogger) Named(name string) hlog.Logger {
+	return *new(hlog.Logger)
+}
+
+func (l *intLogger) NewNamed(name string) Logger {
 	sl := l.copy()
 
 	if sl.name != "" {
@@ -796,7 +800,11 @@ func (l *intLogger) Named(name string) Logger {
 // Create a new sub-Logger with an explicit name. This ignores the current
 // name. This is used to create a standalone logger that doesn't fall
 // within the normal hierarchy.
-func (l *intLogger) ResetNamed(name string) Logger {
+func (l *intLogger) ResetNamed(name string) hlog.Logger {
+	return *new(hlog.Logger)
+}
+
+func (l *intLogger) NewResetNamed(name string) Logger {
 	sl := l.copy()
 
 	sl.name = name

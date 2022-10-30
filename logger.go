@@ -136,12 +136,18 @@ type Logger interface {
 	// If the logger already has a name, the new value will be appended to the current
 	// name. That way, a major subsystem can use this to decorate all it's own logs
 	// without losing context.
-	Named(name string) Logger
+
+	// to satisfy go-kms-wrapping
+	Named(name string) hlog.Logger
+
+	NewNamed(name string) Logger
 
 	// Create a logger that will prepend the name string on the front of all messages.
 	// This sets the name of the logger to the value directly, unlike Named which honor
 	// the current name as well.
-	ResetNamed(name string) Logger
+	ResetNamed(name string) hlog.Logger
+
+	NewResetNamed(name string) Logger
 
 	// Updates the level. This should affect all related loggers as well,
 	// unless they were created with IndependentLevels. If an
@@ -149,6 +155,8 @@ type Logger interface {
 	SetLevel(level hlog.Level)
 
 	// Return a value that conforms to the stdlib log.Logger interface
+	// StandardLogger(opts *hlog.StandardLoggerOptions) *log.Logger
+
 	StandardLogger(opts *StandardLoggerOptions) *log.Logger
 
 	// Return a value that conforms to io.Writer, which can be passed into log.SetOutput()
