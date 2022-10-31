@@ -127,7 +127,9 @@ type Logger interface {
 	ImpliedArgs() []interface{}
 
 	// Creates a sublogger that will always have the given key/value pairs
-	With(args ...interface{}) Logger
+	With(args ...interface{}) hlog.Logger
+
+	// NewWith(args ...interface{}) Logger
 
 	// Returns the Name of the logger
 	Name() string
@@ -140,14 +142,10 @@ type Logger interface {
 	// to satisfy go-kms-wrapping
 	Named(name string) hlog.Logger
 
-	NewNamed(name string) Logger
-
 	// Create a logger that will prepend the name string on the front of all messages.
 	// This sets the name of the logger to the value directly, unlike Named which honor
 	// the current name as well.
 	ResetNamed(name string) hlog.Logger
-
-	NewResetNamed(name string) Logger
 
 	// Updates the level. This should affect all related loggers as well,
 	// unless they were created with IndependentLevels. If an
@@ -157,34 +155,10 @@ type Logger interface {
 	// Return a value that conforms to the stdlib log.Logger interface
 	// StandardLogger(opts *hlog.StandardLoggerOptions) *log.Logger
 
-	StandardLogger(opts *StandardLoggerOptions) *log.Logger
+	StandardLogger(opts *hlog.StandardLoggerOptions) *log.Logger
 
 	// Return a value that conforms to io.Writer, which can be passed into log.SetOutput()
-	StandardWriter(opts *StandardLoggerOptions) io.Writer
-}
-
-// StandardLoggerOptions can be used to configure a new standard logger.
-type StandardLoggerOptions struct {
-	// Indicate that some minimal parsing should be done on strings to try
-	// and detect their level and re-emit them.
-	// This supports the strings like [ERROR], [ERR] [TRACE], [WARN], [INFO],
-	// [DEBUG] and strip it off before reapplying it.
-	InferLevels bool
-
-	// Indicate that some minimal parsing should be done on strings to try
-	// and detect their level and re-emit them while ignoring possible
-	// timestamp values in the beginning of the string.
-	// This supports the strings like [ERROR], [ERR] [TRACE], [WARN], [INFO],
-	// [DEBUG] and strip it off before reapplying it.
-	// The timestamp detection may result in false positives and incomplete
-	// string outputs.
-	InferLevelsWithTimestamp bool
-
-	// ForceLevel is used to force all output from the standard logger to be at
-	// the specified level. Similar to InferLevels, this will strip any level
-	// prefix contained in the logged string before applying the forced level.
-	// If set, this override InferLevels.
-	ForceLevel hlog.Level
+	StandardWriter(opts *hlog.StandardLoggerOptions) io.Writer
 }
 
 type TimeFunction = func() time.Time
@@ -276,10 +250,10 @@ type InterceptLogger interface {
 	ResetNamedIntercept(name string) InterceptLogger
 
 	// Deprecated: use StandardLogger
-	StandardLoggerIntercept(opts *StandardLoggerOptions) *log.Logger
+	StandardLoggerIntercept(opts *hlog.StandardLoggerOptions) *log.Logger
 
 	// Deprecated: use StandardWriter
-	StandardWriterIntercept(opts *StandardLoggerOptions) io.Writer
+	StandardWriterIntercept(opts *hlog.StandardLoggerOptions) io.Writer
 }
 
 // SinkAdapter describes the interface that must be implemented

@@ -734,7 +734,7 @@ const MissingKey = "EXTRA_VALUE_AT_END"
 // Return a sub-Logger for which every emitted log message will contain
 // the given key/value pairs. This is used to create a context specific
 // Logger.
-func (l *intLogger) With(args ...interface{}) Logger {
+func (l *intLogger) With(args ...interface{}) hlog.Logger {
 	var extra interface{}
 
 	if len(args)%2 != 0 {
@@ -782,10 +782,6 @@ func (l *intLogger) With(args ...interface{}) Logger {
 // Create a new sub-Logger that a name decending from the current name.
 // This is used to create a subsystem specific Logger.
 func (l *intLogger) Named(name string) hlog.Logger {
-	return *new(hlog.Logger)
-}
-
-func (l *intLogger) NewNamed(name string) Logger {
 	sl := l.copy()
 
 	if sl.name != "" {
@@ -801,10 +797,6 @@ func (l *intLogger) NewNamed(name string) Logger {
 // name. This is used to create a standalone logger that doesn't fall
 // within the normal hierarchy.
 func (l *intLogger) ResetNamed(name string) hlog.Logger {
-	return *new(hlog.Logger)
-}
-
-func (l *intLogger) NewResetNamed(name string) Logger {
 	sl := l.copy()
 
 	sl.name = name
@@ -856,15 +848,15 @@ func (l *intLogger) SetLevel(level hlog.Level) {
 // Create a *log.Logger that will send it's data through this Logger. This
 // allows packages that expect to be using the standard library log to actually
 // use this logger.
-func (l *intLogger) StandardLogger(opts *StandardLoggerOptions) *log.Logger {
+func (l *intLogger) StandardLogger(opts *hlog.StandardLoggerOptions) *log.Logger {
 	if opts == nil {
-		opts = &StandardLoggerOptions{}
+		opts = &hlog.StandardLoggerOptions{}
 	}
 
 	return log.New(l.StandardWriter(opts), "", 0)
 }
 
-func (l *intLogger) StandardWriter(opts *StandardLoggerOptions) io.Writer {
+func (l *intLogger) StandardWriter(opts *hlog.StandardLoggerOptions) io.Writer {
 	newLog := *l
 	if l.callerOffset > 0 {
 		// the stack is

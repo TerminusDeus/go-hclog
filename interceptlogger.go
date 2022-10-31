@@ -97,10 +97,6 @@ func (i *interceptLogger) retrieveImplied(args ...interface{}) []interface{} {
 // This is used to create a subsystem specific Logger.
 // Registered sinks will subscribe to these messages as well.
 func (i *interceptLogger) Named(name string) hlog.Logger {
-	return *new(hlog.Logger)
-}
-
-func (i *interceptLogger) NewNamed(name string) Logger {
 	return i.NamedIntercept(name)
 }
 
@@ -109,10 +105,6 @@ func (i *interceptLogger) NewNamed(name string) Logger {
 // within the normal hierarchy. Registered sinks will subscribe
 // to these messages as well.
 func (i *interceptLogger) ResetNamed(name string) hlog.Logger {
-	return *new(hlog.Logger)
-}
-
-func (i *interceptLogger) NewResetNamed(name string) Logger {
 	return i.ResetNamedIntercept(name)
 }
 
@@ -123,7 +115,7 @@ func (i *interceptLogger) NamedIntercept(name string) InterceptLogger {
 	var sub interceptLogger
 
 	sub = *i
-	sub.Logger = i.Logger.NewNamed(name)
+	sub.Logger = i.Logger.Named(name)
 	return &sub
 }
 
@@ -135,14 +127,14 @@ func (i *interceptLogger) ResetNamedIntercept(name string) InterceptLogger {
 	var sub interceptLogger
 
 	sub = *i
-	sub.Logger = i.Logger.NewResetNamed(name)
+	sub.Logger = i.Logger.ResetNamed(name)
 	return &sub
 }
 
 // Return a sub-Logger for which every emitted log message will contain
 // the given key/value pairs. This is used to create a context specific
 // Logger.
-func (i *interceptLogger) With(args ...interface{}) Logger {
+func (i *interceptLogger) With(args ...interface{}) hlog.Logger {
 	var sub interceptLogger
 
 	sub = *i
@@ -172,23 +164,23 @@ func (i *interceptLogger) DeregisterSink(sink SinkAdapter) {
 	atomic.AddInt32(i.sinkCount, -1)
 }
 
-func (i *interceptLogger) StandardLoggerIntercept(opts *StandardLoggerOptions) *log.Logger {
+func (i *interceptLogger) StandardLoggerIntercept(opts *hlog.StandardLoggerOptions) *log.Logger {
 	return i.StandardLogger(opts)
 }
 
-func (i *interceptLogger) StandardLogger(opts *StandardLoggerOptions) *log.Logger {
+func (i *interceptLogger) StandardLogger(opts *hlog.StandardLoggerOptions) *log.Logger {
 	if opts == nil {
-		opts = &StandardLoggerOptions{}
+		opts = &hlog.StandardLoggerOptions{}
 	}
 
 	return log.New(i.StandardWriter(opts), "", 0)
 }
 
-func (i *interceptLogger) StandardWriterIntercept(opts *StandardLoggerOptions) io.Writer {
+func (i *interceptLogger) StandardWriterIntercept(opts *hlog.StandardLoggerOptions) io.Writer {
 	return i.StandardWriter(opts)
 }
 
-func (i *interceptLogger) StandardWriter(opts *StandardLoggerOptions) io.Writer {
+func (i *interceptLogger) StandardWriter(opts *hlog.StandardLoggerOptions) io.Writer {
 	return &stdlogAdapter{
 		log:                      i,
 		inferLevels:              opts.InferLevels,
