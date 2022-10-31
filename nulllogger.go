@@ -4,9 +4,9 @@ import (
 	"io"
 	"io/ioutil"
 
-	hlog "github.com/hashicorp/go-hclog"
-
 	"log"
+
+	hclog "github.com/hashicorp/go-hclog"
 )
 
 // NewNullLogger instantiates a Logger for which all calls
@@ -18,7 +18,7 @@ func NewNullLogger() Logger {
 
 type nullLogger struct{}
 
-func (l *nullLogger) Log(level hlog.Level, msg string, args ...interface{}) {}
+func (l *nullLogger) Log(level hclog.Level, msg string, args ...interface{}) {}
 
 func (l *nullLogger) Trace(msg string, args ...interface{}) {}
 
@@ -42,20 +42,20 @@ func (l *nullLogger) IsError() bool { return false }
 
 func (l *nullLogger) ImpliedArgs() []interface{} { return []interface{}{} }
 
-func (l *nullLogger) With(args ...interface{}) hlog.Logger { return l }
+func (l *nullLogger) With(args ...interface{}) hclog.Logger { return l }
 
 func (l *nullLogger) Name() string { return "" }
 
-func (l *nullLogger) Named(name string) hlog.Logger { return l }
+func (l *nullLogger) Named(name string) hclog.Logger { return l }
 
-func (l *nullLogger) ResetNamed(name string) hlog.Logger { return l }
+func (l *nullLogger) ResetNamed(name string) hclog.Logger { return l }
 
-func (l *nullLogger) SetLevel(level hlog.Level) {}
+func (l *nullLogger) SetLevel(level hclog.Level) {}
 
-func (l *nullLogger) StandardLogger(opts *hlog.StandardLoggerOptions) *log.Logger {
+func (l *nullLogger) StandardLogger(opts *hclog.StandardLoggerOptions) *log.Logger {
 	return log.New(l.StandardWriter(opts), "", log.LstdFlags)
 }
 
-func (l *nullLogger) StandardWriter(opts *hlog.StandardLoggerOptions) io.Writer {
+func (l *nullLogger) StandardWriter(opts *hclog.StandardLoggerOptions) io.Writer {
 	return ioutil.Discard
 }

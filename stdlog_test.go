@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	hlog "github.com/hashicorp/go-hclog"
+	hclog "github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +20,7 @@ func TestStdlogAdapter_PickLevel(t *testing.T) {
 
 		level, rest := s.pickLevel("[DEBUG] coffee?")
 
-		assert.Equal(t, hlog.Debug, level)
+		assert.Equal(t, Debug, level)
 		assert.Equal(t, "coffee?", rest)
 	})
 
@@ -29,7 +29,7 @@ func TestStdlogAdapter_PickLevel(t *testing.T) {
 
 		level, rest := s.pickLevel("[TRACE] coffee?")
 
-		assert.Equal(t, hlog.Trace, level)
+		assert.Equal(t, Trace, level)
 		assert.Equal(t, "coffee?", rest)
 	})
 
@@ -38,7 +38,7 @@ func TestStdlogAdapter_PickLevel(t *testing.T) {
 
 		level, rest := s.pickLevel("[INFO] coffee?")
 
-		assert.Equal(t, hlog.Info, level)
+		assert.Equal(t, Info, level)
 		assert.Equal(t, "coffee?", rest)
 	})
 
@@ -47,7 +47,7 @@ func TestStdlogAdapter_PickLevel(t *testing.T) {
 
 		level, rest := s.pickLevel("[WARN] coffee?")
 
-		assert.Equal(t, hlog.Warn, level)
+		assert.Equal(t, Warn, level)
 		assert.Equal(t, "coffee?", rest)
 	})
 
@@ -56,7 +56,7 @@ func TestStdlogAdapter_PickLevel(t *testing.T) {
 
 		level, rest := s.pickLevel("[ERROR] coffee?")
 
-		assert.Equal(t, hlog.Error, level)
+		assert.Equal(t, Error, level)
 		assert.Equal(t, "coffee?", rest)
 	})
 
@@ -65,7 +65,7 @@ func TestStdlogAdapter_PickLevel(t *testing.T) {
 
 		level, rest := s.pickLevel("[ERR] coffee?")
 
-		assert.Equal(t, hlog.Error, level)
+		assert.Equal(t, Error, level)
 		assert.Equal(t, "coffee?", rest)
 	})
 }
@@ -135,39 +135,39 @@ func TestStdlogAdapter_TrimTimestamp(t *testing.T) {
 func TestStdlogAdapter_ForceLevel(t *testing.T) {
 	cases := []struct {
 		name        string
-		forceLevel  hlog.Level
+		forceLevel  hclog.Level
 		inferLevels bool
 		write       string
 		expect      string
 	}{
 		{
 			name:       "force error",
-			forceLevel: hlog.Error,
+			forceLevel: Error,
 			write:      "this is a test",
 			expect:     "[ERROR] test: this is a test\n",
 		},
 		{
 			name:        "force error overrides infer",
-			forceLevel:  hlog.Error,
+			forceLevel:  Error,
 			inferLevels: true,
 			write:       "[DEBUG] this is a test",
 			expect:      "[ERROR] test: this is a test\n",
 		},
 		{
 			name:       "force error and strip debug",
-			forceLevel: hlog.Error,
+			forceLevel: Error,
 			write:      "[DEBUG] this is a test",
 			expect:     "[ERROR] test: this is a test\n",
 		},
 		{
 			name:       "force trace",
-			forceLevel: hlog.Trace,
+			forceLevel: Trace,
 			write:      "this is a test",
 			expect:     "[TRACE] test: this is a test\n",
 		},
 		{
 			name:       "force trace and strip higher level error",
-			forceLevel: hlog.Trace,
+			forceLevel: Trace,
 			write:      "[WARN] this is a test",
 			expect:     "[TRACE] test: this is a test\n",
 		},
@@ -179,14 +179,14 @@ func TestStdlogAdapter_ForceLevel(t *testing.T) {
 		},
 		{
 			name:        "infer debug",
-			forceLevel:  hlog.NoLevel,
+			forceLevel:  NoLevel,
 			inferLevels: true,
 			write:       "[DEBUG] debug info",
 			expect:      "[DEBUG] test: debug info\n",
 		},
 		{
 			name:        "info is used if not forced and cannot infer",
-			forceLevel:  hlog.NoLevel,
+			forceLevel:  NoLevel,
 			inferLevels: false,
 			write:       "some message",
 			expect:      "[INFO]  test: some message\n",
@@ -200,7 +200,7 @@ func TestStdlogAdapter_ForceLevel(t *testing.T) {
 			logger := New(&LoggerOptions{
 				Name:   "test",
 				Output: &stderr,
-				Level:  hlog.Trace,
+				Level:  Trace,
 			})
 
 			s := &stdlogAdapter{

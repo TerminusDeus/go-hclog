@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	hlog "github.com/hashicorp/go-hclog"
+	hclog "github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,12 +19,12 @@ func TestInterceptLogger(t *testing.T) {
 		var sbuf bytes.Buffer
 
 		intercept := NewInterceptLogger(&LoggerOptions{
-			Level:  hlog.Info,
+			Level:  Info,
 			Output: &buf,
 		})
 
 		sink := NewSinkAdapter(&LoggerOptions{
-			Level:  hlog.Debug,
+			Level:  Debug,
 			Output: &sbuf,
 		})
 
@@ -47,12 +47,12 @@ func TestInterceptLogger(t *testing.T) {
 
 		intercept := NewInterceptLogger(&LoggerOptions{
 			Name:   "with_test",
-			Level:  hlog.Info,
+			Level:  Info,
 			Output: &buf,
 		})
 
 		sink := NewSinkAdapter(&LoggerOptions{
-			Level:  hlog.Debug,
+			Level:  Debug,
 			Output: &sbuf,
 		})
 		intercept.RegisterSink(sink)
@@ -82,12 +82,12 @@ func TestInterceptLogger(t *testing.T) {
 
 		intercept := NewInterceptLogger(&LoggerOptions{
 			Name:   "with_test",
-			Level:  hlog.Info,
+			Level:  Info,
 			Output: &buf,
 		})
 
 		sink := NewSinkAdapter(&LoggerOptions{
-			Level:  hlog.Debug,
+			Level:  Debug,
 			Output: &sbuf,
 		})
 		intercept.RegisterSink(sink)
@@ -116,12 +116,12 @@ func TestInterceptLogger(t *testing.T) {
 
 		intercept := NewInterceptLogger(&LoggerOptions{
 			Name:   "with_test",
-			Level:  hlog.Info,
+			Level:  Info,
 			Output: &buf,
 		})
 
 		sink := NewSinkAdapter(&LoggerOptions{
-			Level:  hlog.Debug,
+			Level:  Debug,
 			Output: &sbuf,
 		})
 		intercept.RegisterSink(sink)
@@ -150,12 +150,12 @@ func TestInterceptLogger(t *testing.T) {
 
 		intercept := NewInterceptLogger(&LoggerOptions{
 			Name:   "with_test",
-			Level:  hlog.Info,
+			Level:  Info,
 			Output: &buf,
 		})
 
 		sink := NewSinkAdapter(&LoggerOptions{
-			Level:  hlog.Debug,
+			Level:  Debug,
 			Output: &sbuf,
 		})
 		intercept.RegisterSink(sink)
@@ -171,13 +171,13 @@ func TestInterceptLogger(t *testing.T) {
 		var sbuf bytes.Buffer
 
 		intercept := NewInterceptLogger(&LoggerOptions{
-			Level:           hlog.Info,
+			Level:           Info,
 			Output:          &buf,
 			IncludeLocation: true,
 		})
 
 		sink := NewSinkAdapter(&LoggerOptions{
-			Level:           hlog.Debug,
+			Level:           Debug,
 			Output:          &sbuf,
 			JSONFormat:      true,
 			IncludeLocation: true,
@@ -215,12 +215,12 @@ func TestInterceptLogger(t *testing.T) {
 
 		intercept := NewInterceptLogger(&LoggerOptions{
 			Name:   "with_test",
-			Level:  hlog.Debug,
+			Level:  Debug,
 			Output: &buf,
 		})
 
 		sink := NewSinkAdapter(&LoggerOptions{
-			Level:  hlog.Debug,
+			Level:  Debug,
 			Output: &sbuf,
 		})
 		intercept.RegisterSink(sink)
@@ -244,14 +244,14 @@ func TestInterceptLogger(t *testing.T) {
 
 		intercept := NewInterceptLogger(&LoggerOptions{
 			Name:   "with_name",
-			Level:  hlog.Debug,
+			Level:  Debug,
 			Output: &buf,
 		})
 
-		standard := intercept.StandardLogger(&hlog.StandardLoggerOptions{InferLevels: true})
+		standard := intercept.StandardLogger(&hclog.StandardLoggerOptions{InferLevels: true})
 
 		sink := NewSinkAdapter(&LoggerOptions{
-			Level:  hlog.Debug,
+			Level:  Debug,
 			Output: &sbuf,
 		})
 		intercept.RegisterSink(sink)
@@ -282,7 +282,7 @@ func TestInterceptLogger(t *testing.T) {
 
 		sink := NewSinkAdapter(&LoggerOptions{
 			IncludeLocation: true,
-			Level:           hlog.Debug,
+			Level:           Debug,
 			Output:          &sbuf,
 		})
 		logger.RegisterSink(sink)

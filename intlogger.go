@@ -21,7 +21,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/fatih/color"
-	hlog "github.com/hashicorp/go-hclog"
+	hclog "github.com/hashicorp/go-hclog"
 )
 
 // TimeFormat is the time format to use for plain (non-JSON) output.
@@ -36,20 +36,20 @@ const TimeFormatJSON = "2006-01-02T15:04:05.000000Z07:00"
 const errJsonUnsupportedTypeMsg = "logging contained values that don't serialize to json"
 
 var (
-	_levelToBracket = map[hlog.Level]string{
-		hlog.Debug: "[DEBUG]",
-		hlog.Trace: "[TRACE]",
-		hlog.Info:  "[INFO] ",
-		hlog.Warn:  "[WARN] ",
-		hlog.Error: "[ERROR]",
+	_levelToBracket = map[hclog.Level]string{
+		Debug: "[DEBUG]",
+		Trace: "[TRACE]",
+		Info:  "[INFO] ",
+		Warn:  "[WARN] ",
+		Error: "[ERROR]",
 	}
 
-	_levelToColor = map[hlog.Level]*color.Color{
-		hlog.Debug: color.New(color.FgHiWhite),
-		hlog.Trace: color.New(color.FgHiGreen),
-		hlog.Info:  color.New(color.FgHiBlue),
-		hlog.Warn:  color.New(color.FgHiYellow),
-		hlog.Error: color.New(color.FgHiRed),
+	_levelToColor = map[hclog.Level]*color.Color{
+		Debug: color.New(color.FgHiWhite),
+		Trace: color.New(color.FgHiGreen),
+		Info:  color.New(color.FgHiBlue),
+		Warn:  color.New(color.FgHiYellow),
+		Error: color.New(color.FgHiRed),
 	}
 
 	faintBoldColor                 = color.New(color.Faint, color.Bold)
@@ -83,7 +83,7 @@ type intLogger struct {
 
 	implied []interface{}
 
-	exclude func(level hlog.Level, msg string, args ...interface{}) bool
+	exclude func(level hclog.Level, msg string, args ...interface{}) bool
 
 	// create subloggers with their own level setting
 	independentLevels bool
@@ -116,8 +116,8 @@ func newLogger(opts *LoggerOptions) *intLogger {
 	}
 
 	level := opts.Level
-	if level == hlog.NoLevel {
-		level = hlog.DefaultLevel
+	if level == NoLevel {
+		level = DefaultLevel
 	}
 
 	mutex := opts.Mutex
@@ -181,8 +181,8 @@ const offsetIntLogger = 3
 
 // Log a message and a set of key/value pairs if the given level is at
 // or more severe that the threshold configured in the Logger.
-func (l *intLogger) log(name string, level hlog.Level, msg string, args ...interface{}) {
-	if level < hlog.Level(atomic.LoadInt32(l.level)) {
+func (l *intLogger) log(name string, level hclog.Level, msg string, args ...interface{}) {
+	if level < hclog.Level(atomic.LoadInt32(l.level)) {
 		return
 	}
 
@@ -262,7 +262,7 @@ func needsQuoting(str string) bool {
 //  2. Color the whole log line, based on the level.
 //  3. Color only the header (level) part of the log line.
 //  4. Color both the header and fields of the log line.
-func (l *intLogger) logPlain(t time.Time, name string, level hlog.Level, msg string, args ...interface{}) {
+func (l *intLogger) logPlain(t time.Time, name string, level hclog.Level, msg string, args ...interface{}) {
 
 	if !l.disableTime {
 		l.writer.WriteString(t.Format(l.timeFormat))
@@ -581,7 +581,7 @@ func (l *intLogger) renderSlice(v reflect.Value) string {
 }
 
 // JSON logging function
-func (l *intLogger) logJSON(t time.Time, name string, level hlog.Level, msg string, args ...interface{}) {
+func (l *intLogger) logJSON(t time.Time, name string, level hclog.Level, msg string, args ...interface{}) {
 	vals := l.jsonMapEntry(t, name, level, msg)
 	args = append(l.implied, args...)
 
@@ -636,7 +636,7 @@ func (l *intLogger) logJSON(t time.Time, name string, level hlog.Level, msg stri
 	}
 }
 
-func (l intLogger) jsonMapEntry(t time.Time, name string, level hlog.Level, msg string) map[string]interface{} {
+func (l intLogger) jsonMapEntry(t time.Time, name string, level hclog.Level, msg string) map[string]interface{} {
 	vals := map[string]interface{}{
 		"@message": msg,
 	}
@@ -646,15 +646,15 @@ func (l intLogger) jsonMapEntry(t time.Time, name string, level hlog.Level, msg 
 
 	var levelStr string
 	switch level {
-	case hlog.Error:
+	case Error:
 		levelStr = "error"
-	case hlog.Warn:
+	case Warn:
 		levelStr = "warn"
-	case hlog.Info:
+	case Info:
 		levelStr = "info"
-	case hlog.Debug:
+	case Debug:
 		levelStr = "debug"
-	case hlog.Trace:
+	case Trace:
 		levelStr = "trace"
 	default:
 		levelStr = "all"
@@ -675,58 +675,58 @@ func (l intLogger) jsonMapEntry(t time.Time, name string, level hlog.Level, msg 
 }
 
 // Emit the message and args at the provided level
-func (l *intLogger) Log(level hlog.Level, msg string, args ...interface{}) {
+func (l *intLogger) Log(level hclog.Level, msg string, args ...interface{}) {
 	l.log(l.Name(), level, msg, args...)
 }
 
 // Emit the message and args at DEBUG level
 func (l *intLogger) Debug(msg string, args ...interface{}) {
-	l.log(l.Name(), hlog.Debug, msg, args...)
+	l.log(l.Name(), Debug, msg, args...)
 }
 
 // Emit the message and args at TRACE level
 func (l *intLogger) Trace(msg string, args ...interface{}) {
-	l.log(l.Name(), hlog.Trace, msg, args...)
+	l.log(l.Name(), Trace, msg, args...)
 }
 
 // Emit the message and args at INFO level
 func (l *intLogger) Info(msg string, args ...interface{}) {
-	l.log(l.Name(), hlog.Info, msg, args...)
+	l.log(l.Name(), Info, msg, args...)
 }
 
 // Emit the message and args at WARN level
 func (l *intLogger) Warn(msg string, args ...interface{}) {
-	l.log(l.Name(), hlog.Warn, msg, args...)
+	l.log(l.Name(), Warn, msg, args...)
 }
 
 // Emit the message and args at ERROR level
 func (l *intLogger) Error(msg string, args ...interface{}) {
-	l.log(l.Name(), hlog.Error, msg, args...)
+	l.log(l.Name(), Error, msg, args...)
 }
 
 // Indicate that the logger would emit TRACE level logs
 func (l *intLogger) IsTrace() bool {
-	return hlog.Level(atomic.LoadInt32(l.level)) == hlog.Trace
+	return hclog.Level(atomic.LoadInt32(l.level)) == Trace
 }
 
 // Indicate that the logger would emit DEBUG level logs
 func (l *intLogger) IsDebug() bool {
-	return hlog.Level(atomic.LoadInt32(l.level)) <= hlog.Debug
+	return hclog.Level(atomic.LoadInt32(l.level)) <= Debug
 }
 
 // Indicate that the logger would emit INFO level logs
 func (l *intLogger) IsInfo() bool {
-	return hlog.Level(atomic.LoadInt32(l.level)) <= hlog.Info
+	return hclog.Level(atomic.LoadInt32(l.level)) <= Info
 }
 
 // Indicate that the logger would emit WARN level logs
 func (l *intLogger) IsWarn() bool {
-	return hlog.Level(atomic.LoadInt32(l.level)) <= hlog.Warn
+	return hclog.Level(atomic.LoadInt32(l.level)) <= Warn
 }
 
 // Indicate that the logger would emit ERROR level logs
 func (l *intLogger) IsError() bool {
-	return hlog.Level(atomic.LoadInt32(l.level)) <= hlog.Error
+	return hclog.Level(atomic.LoadInt32(l.level)) <= Error
 }
 
 const MissingKey = "EXTRA_VALUE_AT_END"
@@ -734,7 +734,7 @@ const MissingKey = "EXTRA_VALUE_AT_END"
 // Return a sub-Logger for which every emitted log message will contain
 // the given key/value pairs. This is used to create a context specific
 // Logger.
-func (l *intLogger) With(args ...interface{}) hlog.Logger {
+func (l *intLogger) With(args ...interface{}) hclog.Logger {
 	var extra interface{}
 
 	if len(args)%2 != 0 {
@@ -781,7 +781,7 @@ func (l *intLogger) With(args ...interface{}) hlog.Logger {
 
 // Create a new sub-Logger that a name decending from the current name.
 // This is used to create a subsystem specific Logger.
-func (l *intLogger) Named(name string) hlog.Logger {
+func (l *intLogger) Named(name string) hclog.Logger {
 	sl := l.copy()
 
 	if sl.name != "" {
@@ -796,7 +796,7 @@ func (l *intLogger) Named(name string) hlog.Logger {
 // Create a new sub-Logger with an explicit name. This ignores the current
 // name. This is used to create a standalone logger that doesn't fall
 // within the normal hierarchy.
-func (l *intLogger) ResetNamed(name string) hlog.Logger {
+func (l *intLogger) ResetNamed(name string) hclog.Logger {
 	sl := l.copy()
 
 	sl.name = name
@@ -841,22 +841,22 @@ func (l *intLogger) resetOutput(opts *LoggerOptions) error {
 
 // Update the logging level on-the-fly. This will affect all subloggers as
 // well.
-func (l *intLogger) SetLevel(level hlog.Level) {
+func (l *intLogger) SetLevel(level hclog.Level) {
 	atomic.StoreInt32(l.level, int32(level))
 }
 
 // Create a *log.Logger that will send it's data through this Logger. This
 // allows packages that expect to be using the standard library log to actually
 // use this logger.
-func (l *intLogger) StandardLogger(opts *hlog.StandardLoggerOptions) *log.Logger {
+func (l *intLogger) StandardLogger(opts *hclog.StandardLoggerOptions) *log.Logger {
 	if opts == nil {
-		opts = &hlog.StandardLoggerOptions{}
+		opts = &hclog.StandardLoggerOptions{}
 	}
 
 	return log.New(l.StandardWriter(opts), "", 0)
 }
 
-func (l *intLogger) StandardWriter(opts *hlog.StandardLoggerOptions) io.Writer {
+func (l *intLogger) StandardWriter(opts *hclog.StandardLoggerOptions) io.Writer {
 	newLog := *l
 	if l.callerOffset > 0 {
 		// the stack is
@@ -883,7 +883,7 @@ func (l *intLogger) checkWriterIsFile() *os.File {
 }
 
 // Accept implements the SinkAdapter interface
-func (i *intLogger) Accept(name string, level hlog.Level, msg string, args ...interface{}) {
+func (i *intLogger) Accept(name string, level hclog.Level, msg string, args ...interface{}) {
 	i.log(name, level, msg, args...)
 }
 

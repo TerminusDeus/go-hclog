@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	hlog "github.com/hashicorp/go-hclog"
+	hclog "github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -389,7 +389,7 @@ func TestLogger(t *testing.T) {
 		rootLogger := New(&LoggerOptions{
 			Name:   "with_test",
 			Output: &buf,
-			Level:  hlog.Warn,
+			Level:  Warn,
 		})
 
 		// Build the root logger in two steps, which triggers a slice capacity increase
@@ -414,7 +414,7 @@ func TestLogger(t *testing.T) {
 			t.Fatalf("unexpected output: %s", output)
 		}
 
-		derived.SetLevel(hlog.Info)
+		derived.SetLevel(Info)
 
 		rootLogger.Info("root_test", "bird", 10)
 		output = buf.String()
@@ -557,7 +557,7 @@ func TestLogger(t *testing.T) {
 		logger := New(&LoggerOptions{
 			// No name!
 			Output:            &buf,
-			Level:             hlog.Off,
+			Level:             Off,
 			IndependentLevels: true,
 		})
 
@@ -570,7 +570,7 @@ func TestLogger(t *testing.T) {
 		buf.Reset()
 
 		another := logger.Named("sublogger")
-		another.SetLevel(hlog.Info)
+		another.SetLevel(Info)
 		another.Info("this is test")
 		str = buf.String()
 		dataIdx := strings.IndexByte(str, ' ')
@@ -593,7 +593,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 
 		logger := New(&LoggerOptions{
 			Name:   "test",
-			Output: NewLeveledWriter(&stdout, map[hlog.Level]io.Writer{hlog.Error: &stderr}),
+			Output: NewLeveledWriter(&stdout, map[hclog.Level]io.Writer{Error: &stderr}),
 		})
 
 		logger.Error("this is an error", "who", "programmer", "why", "testing")
@@ -611,7 +611,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 
 		logger := New(&LoggerOptions{
 			Name:   "test",
-			Output: NewLeveledWriter(&stdout, map[hlog.Level]io.Writer{hlog.Error: &stderr}),
+			Output: NewLeveledWriter(&stdout, map[hclog.Level]io.Writer{Error: &stderr}),
 		})
 
 		logger.Info("this is test", "who", "programmer", "why", "testing")
@@ -629,7 +629,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 
 		logger := New(&LoggerOptions{
 			Name:   "test",
-			Output: NewLeveledWriter(&stdout, map[hlog.Level]io.Writer{hlog.Error: &stderr}),
+			Output: NewLeveledWriter(&stdout, map[hclog.Level]io.Writer{Error: &stderr}),
 		})
 
 		logger.Info("this is test", "who", "programmer", "why", "testing")

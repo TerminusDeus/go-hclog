@@ -3,8 +3,6 @@ package hclog
 import (
 	"sync"
 	"time"
-
-	hlog "github.com/hashicorp/go-hclog"
 )
 
 var (
@@ -15,7 +13,7 @@ var (
 	// only when the Default logger is created, so set them as soon as the
 	// process starts.
 	DefaultOptions = &LoggerOptions{
-		Level:  hlog.DefaultLevel,
+		Level:  DefaultLevel,
 		Output: DefaultOutput,
 		TimeFn: time.Now,
 	}

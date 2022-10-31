@@ -5,7 +5,6 @@ import (
 	"context"
 	"testing"
 
-	hlog "github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,7 +21,7 @@ func TestContext_empty(t *testing.T) {
 func TestContext_fields(t *testing.T) {
 	var buf bytes.Buffer
 	l := New(&LoggerOptions{
-		Level:  hlog.Debug,
+		Level:  Debug,
 		Output: &buf,
 	})
 
