@@ -5,8 +5,6 @@ import (
 	"log"
 	"sync"
 	"sync/atomic"
-
-	hclog "github.com/hashicorp/go-hclog"
 )
 
 var _ Logger = &interceptLogger{}
@@ -37,7 +35,7 @@ func NewInterceptLogger(opts *LoggerOptions) InterceptLogger {
 	return intercept
 }
 
-func (i *interceptLogger) Log(level hclog.Level, msg string, args ...interface{}) {
+func (i *interceptLogger) Log(level Level, msg string, args ...interface{}) {
 	i.log(level, msg, args...)
 }
 
@@ -45,7 +43,7 @@ func (i *interceptLogger) Log(level hclog.Level, msg string, args ...interface{}
 // all called Log then direct calls to Log would have a different stack frame
 // depth. By having all the methods call the same helper we ensure the stack
 // frame depth is the same.
-func (i *interceptLogger) log(level hclog.Level, msg string, args ...interface{}) {
+func (i *interceptLogger) log(level Level, msg string, args ...interface{}) {
 	i.Logger.Log(level, msg, args...)
 	if atomic.LoadInt32(i.sinkCount) == 0 {
 		return
@@ -96,7 +94,7 @@ func (i *interceptLogger) retrieveImplied(args ...interface{}) []interface{} {
 // Create a new sub-Logger that a name descending from the current name.
 // This is used to create a subsystem specific Logger.
 // Registered sinks will subscribe to these messages as well.
-func (i *interceptLogger) Named(name string) hclog.Logger {
+func (i *interceptLogger) Named(name string) Logger {
 	return i.NamedIntercept(name)
 }
 
@@ -104,7 +102,7 @@ func (i *interceptLogger) Named(name string) hclog.Logger {
 // name. This is used to create a standalone logger that doesn't fall
 // within the normal hierarchy. Registered sinks will subscribe
 // to these messages as well.
-func (i *interceptLogger) ResetNamed(name string) hclog.Logger {
+func (i *interceptLogger) ResetNamed(name string) Logger {
 	return i.ResetNamedIntercept(name)
 }
 
@@ -134,7 +132,7 @@ func (i *interceptLogger) ResetNamedIntercept(name string) InterceptLogger {
 // Return a sub-Logger for which every emitted log message will contain
 // the given key/value pairs. This is used to create a context specific
 // Logger.
-func (i *interceptLogger) With(args ...interface{}) hclog.Logger {
+func (i *interceptLogger) With(args ...interface{}) Logger {
 	var sub interceptLogger
 
 	sub = *i
@@ -164,23 +162,23 @@ func (i *interceptLogger) DeregisterSink(sink SinkAdapter) {
 	atomic.AddInt32(i.sinkCount, -1)
 }
 
-func (i *interceptLogger) StandardLoggerIntercept(opts *hclog.StandardLoggerOptions) *log.Logger {
+func (i *interceptLogger) StandardLoggerIntercept(opts *StandardLoggerOptions) *log.Logger {
 	return i.StandardLogger(opts)
 }
 
-func (i *interceptLogger) StandardLogger(opts *hclog.StandardLoggerOptions) *log.Logger {
+func (i *interceptLogger) StandardLogger(opts *StandardLoggerOptions) *log.Logger {
 	if opts == nil {
-		opts = &hclog.StandardLoggerOptions{}
+		opts = &StandardLoggerOptions{}
 	}
 
 	return log.New(i.StandardWriter(opts), "", 0)
 }
 
-func (i *interceptLogger) StandardWriterIntercept(opts *hclog.StandardLoggerOptions) io.Writer {
+func (i *interceptLogger) StandardWriterIntercept(opts *StandardLoggerOptions) io.Writer {
 	return i.StandardWriter(opts)
 }
 
-func (i *interceptLogger) StandardWriter(opts *hclog.StandardLoggerOptions) io.Writer {
+func (i *interceptLogger) StandardWriter(opts *StandardLoggerOptions) io.Writer {
 	return &stdlogAdapter{
 		log:                      i,
 		inferLevels:              opts.InferLevels,

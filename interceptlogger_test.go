@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	hclog "github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -248,7 +247,7 @@ func TestInterceptLogger(t *testing.T) {
 			Output: &buf,
 		})
 
-		standard := intercept.StandardLogger(&hclog.StandardLoggerOptions{InferLevels: true})
+		standard := intercept.StandardLogger(&StandardLoggerOptions{InferLevels: true})
 
 		sink := NewSinkAdapter(&LoggerOptions{
 			Level:  Debug,

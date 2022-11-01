@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	hclog "github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -212,7 +211,7 @@ func TestLogger(t *testing.T) {
 		lines := strings.Split(buf.String(), "\n")
 		require.True(t, len(lines) > 1)
 
-		assert.Equal(t, "github.com/hashicorp/go-hclog.Stacktrace", lines[1])
+		assert.Equal(t, "github.com/TerminusDeus/go-hclog.Stacktrace", lines[1])
 	})
 
 	t.Run("outputs stack traces with it's given a name", func(t *testing.T) {
@@ -228,7 +227,7 @@ func TestLogger(t *testing.T) {
 		lines := strings.Split(buf.String(), "\n")
 		require.True(t, len(lines) > 1)
 
-		assert.Equal(t, "github.com/hashicorp/go-hclog.Stacktrace", lines[1])
+		assert.Equal(t, "github.com/TerminusDeus/go-hclog.Stacktrace", lines[1])
 	})
 
 	t.Run("prefixes the name", func(t *testing.T) {
@@ -593,7 +592,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 
 		logger := New(&LoggerOptions{
 			Name:   "test",
-			Output: NewLeveledWriter(&stdout, map[hclog.Level]io.Writer{Error: &stderr}),
+			Output: NewLeveledWriter(&stdout, map[Level]io.Writer{Error: &stderr}),
 		})
 
 		logger.Error("this is an error", "who", "programmer", "why", "testing")
@@ -611,7 +610,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 
 		logger := New(&LoggerOptions{
 			Name:   "test",
-			Output: NewLeveledWriter(&stdout, map[hclog.Level]io.Writer{Error: &stderr}),
+			Output: NewLeveledWriter(&stdout, map[Level]io.Writer{Error: &stderr}),
 		})
 
 		logger.Info("this is test", "who", "programmer", "why", "testing")
@@ -629,7 +628,7 @@ func TestLogger_leveledWriter(t *testing.T) {
 
 		logger := New(&LoggerOptions{
 			Name:   "test",
-			Output: NewLeveledWriter(&stdout, map[hclog.Level]io.Writer{Error: &stderr}),
+			Output: NewLeveledWriter(&stdout, map[Level]io.Writer{Error: &stderr}),
 		})
 
 		logger.Info("this is test", "who", "programmer", "why", "testing")

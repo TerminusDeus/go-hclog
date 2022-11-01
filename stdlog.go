@@ -5,8 +5,6 @@ import (
 	"log"
 	"regexp"
 	"strings"
-
-	hclog "github.com/hashicorp/go-hclog"
 )
 
 // Regex to ignore characters commonly found in timestamp formats from the
@@ -20,7 +18,7 @@ type stdlogAdapter struct {
 	log                      Logger
 	inferLevels              bool
 	inferLevelsWithTimestamp bool
-	forceLevel               hclog.Level
+	forceLevel               Level
 }
 
 // Take the data, infer the levels if configured, and send it through
@@ -49,7 +47,7 @@ func (s *stdlogAdapter) Write(data []byte) (int, error) {
 	return len(data), nil
 }
 
-func (s *stdlogAdapter) dispatch(str string, level hclog.Level) {
+func (s *stdlogAdapter) dispatch(str string, level Level) {
 	switch level {
 	case Trace:
 		s.log.Trace(str)
@@ -67,7 +65,7 @@ func (s *stdlogAdapter) dispatch(str string, level hclog.Level) {
 }
 
 // Detect, based on conventions, what log level this is.
-func (s *stdlogAdapter) pickLevel(str string) (hclog.Level, string) {
+func (s *stdlogAdapter) pickLevel(str string) (Level, string) {
 	switch {
 	case strings.HasPrefix(str, "[DEBUG]"):
 		return Debug, strings.TrimSpace(str[7:])

@@ -2,7 +2,7 @@
 
 [![Go Documentation](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][godocs]
 
-[godocs]: https://godoc.org/github.com/hashicorp/go-hclog
+[godocs]: https://godoc.org/github.com/TerminusDeus/go-hclog
 
 `go-hclog` is a package for Go that provides a simple key/value logging
 interface for use in development and production environments.
@@ -25,7 +25,7 @@ and promised through future versions.
 Install using `go get github.com/TerminusDeus/go-hclog`.
 
 Full documentation is available at
-http://godoc.org/github.com/hashicorp/go-hclog
+http://godoc.org/github.com/TerminusDeus/go-hclog
 
 ## Usage
 

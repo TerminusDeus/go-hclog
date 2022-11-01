@@ -1,4 +1,4 @@
-module github.com/hashicorp/go-hclog/hclogvet
+module github.com/TerminusDeus/go-hclog/hclogvet
 
 go 1.18
 

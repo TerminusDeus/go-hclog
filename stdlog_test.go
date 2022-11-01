@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	hclog "github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -135,7 +134,7 @@ func TestStdlogAdapter_TrimTimestamp(t *testing.T) {
 func TestStdlogAdapter_ForceLevel(t *testing.T) {
 	cases := []struct {
 		name        string
-		forceLevel  hclog.Level
+		forceLevel  Level
 		inferLevels bool
 		write       string
 		expect      string
