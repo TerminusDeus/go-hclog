@@ -1,4 +1,4 @@
-# go-hclog
+# Based on github.com/hashicorp/go-hclog
 
 [![Go Documentation](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][godocs]
 
@@ -22,7 +22,11 @@ and promised through future versions.
 
 ## Installation and Docs
 
-Install using `go get github.com/hashicorp/go-hclog`.
+Install using `go get github.com/TerminusDeus/go-hclog`.
+
+Using go modules with go 1.13:
+#### 1 add to go.mod: replace github.com/hashicorp/go-hclog => github.com/TerminusDeus/go-hclog latest
+#### 2 go mod tidy
 
 Full documentation is available at
 http://godoc.org/github.com/hashicorp/go-hclog

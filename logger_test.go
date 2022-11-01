@@ -211,7 +211,7 @@ func TestLogger(t *testing.T) {
 		lines := strings.Split(buf.String(), "\n")
 		require.True(t, len(lines) > 1)
 
-		assert.Equal(t, "github.com/hashicorp/go-hclog.Stacktrace", lines[1])
+		assert.Equal(t, "github.com/TerminusDeus/go-hclog.Stacktrace", lines[1])
 	})
 
 	t.Run("outputs stack traces with it's given a name", func(t *testing.T) {
@@ -227,7 +227,7 @@ func TestLogger(t *testing.T) {
 		lines := strings.Split(buf.String(), "\n")
 		require.True(t, len(lines) > 1)
 
-		assert.Equal(t, "github.com/hashicorp/go-hclog.Stacktrace", lines[1])
+		assert.Equal(t, "github.com/TerminusDeus/go-hclog.Stacktrace", lines[1])
 	})
 
 	t.Run("prefixes the name", func(t *testing.T) {
@@ -665,7 +665,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "programmer", raw["who"])
 		assert.Equal(t, "testing is fun", raw["why"])
 	})
@@ -689,9 +689,9 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		val, ok := raw["@timestamp"]
+		val, ok := raw["timestamp"]
 		if !ok {
-			t.Fatal("missing '@timestamp' key")
+			t.Fatal("missing 'timestamp' key")
 		}
 
 		assert.Equal(t, val, time.Now().Format(time.Kitchen))
@@ -717,9 +717,9 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		val, ok := raw["@timestamp"]
+		val, ok := raw["timestamp"]
 		if !ok {
-			t.Fatal("missing '@timestamp' key")
+			t.Fatal("missing 'timestamp' key")
 		}
 
 		assert.Equal(t, val, time.Now().UTC().Format(time.Kitchen))
@@ -743,8 +743,8 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if val, ok := raw["@timestamp"]; ok {
-			t.Fatalf("got: '@timestamp' key (with value %v); want: no '@timestamp' key", val)
+		if val, ok := raw["timestamp"]; ok {
+			t.Fatalf("got: 'timestamp' key (with value %v); want: no 'timestamp' key", val)
 		}
 	})
 
@@ -766,7 +766,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "programmer", raw["who"])
 		assert.Equal(t, "testing is fun", raw["why"])
 		assert.Equal(t, "in the hat", raw["cat"])
@@ -792,7 +792,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "programmer", raw["who"])
 		assert.Equal(t, errMsg.Error(), raw["err"])
 	})
@@ -825,7 +825,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "programmer", raw["who"])
 		assert.Equal(t, expectedMsg, raw["err"])
 	})
@@ -855,7 +855,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "programmer", raw["who"])
 		assert.Equal(t, expectedMsg, raw["err"])
 	})
@@ -878,7 +878,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "12 beans/day", raw["production"])
 	})
 
@@ -900,7 +900,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, float64(12), raw["bytes"])
 		assert.Equal(t, float64(0755), raw["perms"])
 		assert.Equal(t, float64(5), raw["bits"])
@@ -942,7 +942,7 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
+		assert.Equal(t, "this is test", raw["message"])
 		assert.Equal(t, "unquoted", raw["unquoted"])
 		assert.Equal(t, "quoted", raw["quoted"])
 		assert.Equal(t, "foo\nbar\bbaz\uFFFDa", raw["unsafe"])
@@ -970,8 +970,8 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
-		assert.Equal(t, fmt.Sprintf("%v:%d", file, line-1), raw["@caller"])
+		assert.Equal(t, "this is test", raw["message"])
+		assert.Equal(t, fmt.Sprintf("%v:%d", file, line-1), raw["caller"])
 	})
 
 	t.Run("includes the caller location excluding helper functions", func(t *testing.T) {
@@ -1000,8 +1000,8 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
-		assert.Equal(t, fmt.Sprintf("%v:%d", file, line-1), raw["@caller"])
+		assert.Equal(t, "this is test", raw["message"])
+		assert.Equal(t, fmt.Sprintf("%v:%d", file, line-1), raw["caller"])
 	})
 
 	t.Run("handles non-serializable entries", func(t *testing.T) {
@@ -1023,8 +1023,8 @@ func TestLogger_JSON(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is test", raw["@message"])
-		assert.Equal(t, errJsonUnsupportedTypeMsg, raw["@warn"])
+		assert.Equal(t, "this is test", raw["message"])
+		assert.Equal(t, errJsonUnsupportedTypeMsg, raw["warn"])
 	})
 
 	t.Run("omits the entry for the message when empty", func(t *testing.T) {

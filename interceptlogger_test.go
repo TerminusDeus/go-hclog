@@ -203,9 +203,9 @@ func TestInterceptLogger(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assert.Equal(t, "this is a test", raw["@message"])
+		assert.Equal(t, "this is a test", raw["message"])
 		assert.Equal(t, "caller", raw["who"])
-		assert.Equal(t, fmt.Sprintf("%v:%d", file, line-1), raw["@caller"])
+		assert.Equal(t, fmt.Sprintf("%v:%d", file, line-1), raw["caller"])
 	})
 
 	t.Run("handles parent with arguments and log level args", func(t *testing.T) {

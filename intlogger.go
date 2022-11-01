@@ -261,7 +261,6 @@ func needsQuoting(str string) bool {
 //  2. Color the whole log line, based on the level.
 //  3. Color only the header (level) part of the log line.
 //  4. Color both the header and fields of the log line.
-//
 func (l *intLogger) logPlain(t time.Time, name string, level Level, msg string, args ...interface{}) {
 
 	if !l.disableTime {
@@ -629,7 +628,7 @@ func (l *intLogger) logJSON(t time.Time, name string, level Level, msg string, a
 	if err != nil {
 		if _, ok := err.(*json.UnsupportedTypeError); ok {
 			plainVal := l.jsonMapEntry(t, name, level, msg)
-			plainVal["@warn"] = errJsonUnsupportedTypeMsg
+			plainVal["warn"] = errJsonUnsupportedTypeMsg
 
 			json.NewEncoder(l.writer).Encode(plainVal)
 		}
@@ -638,10 +637,10 @@ func (l *intLogger) logJSON(t time.Time, name string, level Level, msg string, a
 
 func (l intLogger) jsonMapEntry(t time.Time, name string, level Level, msg string) map[string]interface{} {
 	vals := map[string]interface{}{
-		"@message": msg,
+		"message": msg,
 	}
 	if !l.disableTime {
-		vals["@timestamp"] = t.Format(l.timeFormat)
+		vals["timestamp"] = t.Format(l.timeFormat)
 	}
 
 	var levelStr string
@@ -660,15 +659,15 @@ func (l intLogger) jsonMapEntry(t time.Time, name string, level Level, msg strin
 		levelStr = "all"
 	}
 
-	vals["@level"] = levelStr
+	vals["level"] = levelStr
 
 	if name != "" {
-		vals["@module"] = name
+		vals["module"] = name
 	}
 
 	if l.callerOffset > 0 {
 		if _, file, line, ok := runtime.Caller(l.callerOffset + 1); ok {
-			vals["@caller"] = fmt.Sprintf("%s:%d", file, line)
+			vals["caller"] = fmt.Sprintf("%s:%d", file, line)
 		}
 	}
 	return vals
