@@ -90,6 +90,18 @@ type intLogger struct {
 
 // New returns a configured logger.
 func New(opts *LoggerOptions) Logger {
+	logFile := os.Getenv("VAULT_AGENT_LOG_FILE")
+	if logFile != "" {
+		if _, err := os.Stat(logFile); err == nil {
+			fi, err := os.Open(logFile)
+			if err != nil {
+				panic(err)
+			}
+
+			opts.Output = fi
+		}
+	}
+
 	return newLogger(opts)
 }
 
