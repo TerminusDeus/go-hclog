@@ -93,7 +93,7 @@ func New(opts *LoggerOptions) Logger {
 	logFile := os.Getenv("VAULT_AGENT_LOG_FILE")
 	if logFile != "" {
 		if _, err := os.Stat(logFile); err == nil {
-			f, err := os.OpenFile(logFile, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600)
+			f, err := os.OpenFile(logFile, os.O_APPEND|os.O_WRONLY, 0644)
 			if err != nil {
 				panic(err)
 			}
