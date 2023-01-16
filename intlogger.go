@@ -91,21 +91,39 @@ type intLogger struct {
 
 // New returns a configured logger.
 func New(opts *LoggerOptions) Logger {
-	logFile := os.Getenv("VAULT_AGENT_LOG_FILE")
-	if logFile != "" {
+	logFileName := os.Getenv("VAULT_AGENT_LOG_FILE_NAME")
+	if logFileName != "" {
 
-		if _, err := os.Stat(logFile); err == nil {
-			_, err := os.OpenFile(logFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if _, err := os.Stat(logFileName); err == nil {
+			_, err := os.OpenFile(logFileName, os.O_APPEND|os.O_WRONLY, 0644)
 			if err != nil {
 				panic(err)
 			}
 
+			logFileMaxSizeRaw := os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
+
+			var logFileMaxSize int
+			if logFileMaxSizeRaw != "" {
+				logFileMaxSize, err = strconv.Atoi(logFileMaxSizeRaw)
+				if err != nil {
+					panic(errors.New("bad value for logFileMaxSize: " + logFileMaxSizeRaw))
+				}
+			}
+
+			logFileMaxAgeRaw := os.Getenv("VAULT_AGENT_LOG_FILE_MAX_AGE")
+
+			var logFileMaxAge int
+			if logFileMaxAgeRaw != "" {
+				logFileMaxAge, err = strconv.Atoi(logFileMaxAgeRaw)
+				if err != nil {
+					panic(errors.New("bad value for logFileMaxAge: " + logFileMaxAgeRaw))
+				}
+			}
+
 			opts.Output = &lumberjack.Logger{
-				Filename:   logFile,
-				MaxSize:    2, // megabytes
-				MaxBackups: 0,
-				MaxAge:     3,     //minutes
-				Compress:   false, // disabled by default
+				Filename: logFileName,
+				MaxSize:  logFileMaxSize, // megabytes
+				MaxAge:   logFileMaxAge,  //minutes
 			}
 		}
 	}
