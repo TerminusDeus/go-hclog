@@ -102,8 +102,8 @@ func New(opts *LoggerOptions) Logger {
 
 			opts.Output = &lumberjack.Logger{
 				Filename:   logFile,
-				MaxSize:    500, // megabytes
-				MaxBackups: 1,
+				MaxSize:    2, // megabytes
+				MaxBackups: 0,
 				MaxAge:     3,     //minutes
 				Compress:   false, // disabled by default
 			}
