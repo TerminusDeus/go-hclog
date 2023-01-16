@@ -20,6 +20,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	lumberjack "github.com/TerminusDeus/lumberjack"
 	"github.com/fatih/color"
 )
 
@@ -92,13 +93,20 @@ type intLogger struct {
 func New(opts *LoggerOptions) Logger {
 	logFile := os.Getenv("VAULT_AGENT_LOG_FILE")
 	if logFile != "" {
+
 		if _, err := os.Stat(logFile); err == nil {
-			f, err := os.OpenFile(logFile, os.O_APPEND|os.O_WRONLY, 0644)
+			_, err := os.OpenFile(logFile, os.O_APPEND|os.O_WRONLY, 0644)
 			if err != nil {
 				panic(err)
 			}
 
-			opts.Output = f
+			opts.Output = &lumberjack.Logger{
+				Filename:   logFile,
+				MaxSize:    500, // megabytes
+				MaxBackups: 1,
+				MaxAge:     3,     //minutes
+				Compress:   false, // disabled by default
+			}
 		}
 	}
 
