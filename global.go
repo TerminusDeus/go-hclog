@@ -6,6 +6,8 @@ import (
 )
 
 var (
+	agentOptions = &VaultAgentOptions{}
+
 	protect sync.Once
 	def     Logger
 
@@ -61,4 +63,8 @@ func SetDefault(log Logger) Logger {
 	old := def
 	def = log
 	return old
+}
+
+func SetAgentOptions(options *VaultAgentOptions) {
+	agentOptions = options
 }

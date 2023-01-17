@@ -91,7 +91,7 @@ type intLogger struct {
 
 // New returns a configured logger.
 func New(opts *LoggerOptions) Logger {
-	logFileName := os.Getenv("VAULT_AGENT_LOG_FILE_NAME")
+	logFileName := agentOptions.LogFilePath // os.Getenv("VAULT_AGENT_LOG_FILE_NAME")
 	if logFileName != "" {
 
 		if _, err := os.Stat(logFileName); err == nil {
@@ -100,7 +100,7 @@ func New(opts *LoggerOptions) Logger {
 				panic(err)
 			}
 
-			logFileMaxSizeRaw := os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
+			logFileMaxSizeRaw := agentOptions.LogMaxSize // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
 
 			var logFileMaxSize int
 			if logFileMaxSizeRaw != "" {
@@ -110,20 +110,20 @@ func New(opts *LoggerOptions) Logger {
 				}
 			}
 
-			logFileMaxAgeRaw := os.Getenv("VAULT_AGENT_LOG_FILE_MAX_AGE")
+			logFileTTLRaw := agentOptions.LogTTL // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_AGE")
 
-			var logFileMaxAge int
-			if logFileMaxAgeRaw != "" {
-				logFileMaxAge, err = strconv.Atoi(logFileMaxAgeRaw)
+			var logFileTTL int
+			if logFileTTLRaw != "" {
+				logFileTTL, err = strconv.Atoi(logFileTTLRaw)
 				if err != nil {
-					panic(errors.New("bad value for logFileMaxAge: " + logFileMaxAgeRaw))
+					panic(errors.New("bad value for logFileTTL: " + logFileTTLRaw))
 				}
 			}
 
 			opts.Output = &lumberjack.Logger{
 				Filename: logFileName,
 				MaxSize:  logFileMaxSize, // megabytes
-				MaxAge:   logFileMaxAge,  //minutes
+				MaxAge:   logFileTTL,  //minutes
 			}
 		}
 	}

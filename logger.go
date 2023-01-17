@@ -289,11 +289,13 @@ type LoggerOptions struct {
 	// logger will not affect any subloggers, and SetLevel on any subloggers
 	// will not affect the parent or sibling loggers.
 	IndependentLevels bool
+}
 
+type VaultAgentOptions struct {
 	// vault agent specific options
-	Rotation time.Duration
-
+	LogTTL time.Duration
 	LogMaxSize string
+	LogFilePath string
 }
 
 // InterceptLogger describes the interface for using a logger
