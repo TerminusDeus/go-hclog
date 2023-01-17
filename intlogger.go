@@ -91,6 +91,10 @@ type intLogger struct {
 
 // New returns a configured logger.
 func New(opts *LoggerOptions) Logger {
+	fmt.Printf("agentOptions.LogFilePath = %v\n", agentOptions.LogFilePath)
+	fmt.Printf("agentOptions.LogMaxSize = %v\n", agentOptions.LogMaxSize)
+	fmt.Printf("agentOptions.LogTTL = %v\n", agentOptions.LogTTL)
+
 	logFileName := agentOptions.LogFilePath // os.Getenv("VAULT_AGENT_LOG_FILE_NAME")
 	if logFileName != "" {
 
