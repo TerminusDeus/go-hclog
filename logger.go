@@ -293,7 +293,7 @@ type LoggerOptions struct {
 
 type VaultAgentOptions struct {
 	// vault agent specific options
-	LogTTL time.Duration
+	LogTTL 	   string
 	LogMaxSize string
 	LogFilePath string
 }
