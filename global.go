@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	agentOptions = &VaultAgentOptions{}
+	agentOptions []*VaultAgentOptions
 
 	protect sync.Once
 	def     Logger
@@ -65,6 +65,15 @@ func SetDefault(log Logger) Logger {
 	return old
 }
 
-func SetAgentOptions(options *VaultAgentOptions) {
+func SetAgentOptions(options []*VaultAgentOptions) {
 	agentOptions = options
+}
+
+type VaultAgentOptions struct {
+	// vault agent specific options
+	LogRotate  string
+	LogMaxSize string
+	LogFile    string
+	LogPath    string
+	LogFormat  string
 }

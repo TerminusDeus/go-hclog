@@ -91,45 +91,58 @@ type intLogger struct {
 
 // New returns a configured logger.
 func New(opts *LoggerOptions) Logger {
-	fmt.Printf("agentOptions.LogFilePath = %v\n", agentOptions.LogFilePath)
-	fmt.Printf("agentOptions.LogMaxSize = %v\n", agentOptions.LogMaxSize)
-	fmt.Printf("agentOptions.LogTTL = %v\n", agentOptions.LogTTL)
+	// assumes that several destinations are set
+	if len(agentOptions) > 0 {
+		aggregatedOpts := []*LoggerOptions{}
 
-	logFileName := agentOptions.LogFilePath // os.Getenv("VAULT_AGENT_LOG_FILE_NAME")
-	if logFileName != "" {
+		for _, destination := range agentOptions {
+			if destination.LogFile != "" {
+				logFileName := destination.LogFile + destination.LogPath
 
-		if _, err := os.Stat(logFileName); err == nil {
-			_, err := os.OpenFile(logFileName, os.O_APPEND|os.O_WRONLY, 0644)
-			if err != nil {
-				panic(err)
-			}
+				fmt.Printf("destination.LogFile = %v\n", destination.LogFile)
+				fmt.Printf("destination.LogMaxSize = %v\n", destination.LogMaxSize)
+				fmt.Printf("destination.LogRotate = %v\n", destination.LogRotate)
+				fmt.Printf("destination.LogFormat = %v\n", destination.LogFormat)
+				fmt.Printf("destination.LogPath = %v\n", destination.LogPath)
 
-			logFileMaxSizeRaw := agentOptions.LogMaxSize // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
+				if _, err := os.Stat(logFileName); err == nil {
+					_, err := os.OpenFile(logFileName, os.O_APPEND|os.O_WRONLY, 0644)
+					if err != nil {
+						panic(err)
+					}
 
-			var logFileMaxSize int
-			if logFileMaxSizeRaw != "" {
-				logFileMaxSize, err = strconv.Atoi(logFileMaxSizeRaw)
-				if err != nil {
-					panic(errors.New("bad value for logFileMaxSize: " + logFileMaxSizeRaw))
+					logFileMaxSizeRaw := destination.LogMaxSize // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
+
+					var logFileMaxSize int
+					if logFileMaxSizeRaw != "" {
+						logFileMaxSize, err = strconv.Atoi(logFileMaxSizeRaw)
+						if err != nil {
+							panic(errors.New("bad value for logFileMaxSize: " + logFileMaxSizeRaw))
+						}
+					}
+
+					logFileTTLRaw := destination.LogRotate // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_AGE")
+
+					var logFileTTL int
+					if logFileTTLRaw != "" {
+						logFileTTL, err = strconv.Atoi(logFileTTLRaw)
+						if err != nil {
+							panic(errors.New("bad value for logFileTTL: " + logFileTTLRaw))
+						}
+					}
+
+					opts.Output = &lumberjack.Logger{
+						Filename: logFileName,
+						MaxSize:  logFileMaxSize, // megabytes
+						MaxAge:   logFileTTL,     //minutes
+					}
 				}
-			}
-
-			logFileTTLRaw := agentOptions.LogTTL // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_AGE")
-
-			var logFileTTL int
-			if logFileTTLRaw != "" {
-				logFileTTL, err = strconv.Atoi(logFileTTLRaw)
-				if err != nil {
-					panic(errors.New("bad value for logFileTTL: " + logFileTTLRaw))
-				}
-			}
-
-			opts.Output = &lumberjack.Logger{
-				Filename: logFileName,
-				MaxSize:  logFileMaxSize, // megabytes
-				MaxAge:   logFileTTL,  //minutes
 			}
 		}
+
+		aggregatedOpts = append(aggregatedOpts, opts)
+
+		return newMultiLogger(aggregatedOpts)
 	}
 
 	return newLogger(opts)

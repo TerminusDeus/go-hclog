@@ -291,13 +291,6 @@ type LoggerOptions struct {
 	IndependentLevels bool
 }
 
-type VaultAgentOptions struct {
-	// vault agent specific options
-	LogTTL 	   string
-	LogMaxSize string
-	LogFilePath string
-}
-
 // InterceptLogger describes the interface for using a logger
 // that can register different output sinks.
 // This is useful for sending lower level log messages
