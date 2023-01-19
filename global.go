@@ -76,4 +76,5 @@ type VaultAgentOptions struct {
 	LogFile    string
 	LogPath    string
 	LogFormat  string
+	LogLevel   string
 }

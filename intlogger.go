@@ -131,6 +131,9 @@ func New(opts *LoggerOptions) Logger {
 						}
 					}
 
+					opts.JSONFormat = destination.LogFormat == "json"
+					opts.Level = LevelFromString(destination.LogLevel)
+
 					opts.Output = &lumberjack.Logger{
 						Filename: logFileName,
 						MaxSize:  logFileMaxSize, // megabytes
