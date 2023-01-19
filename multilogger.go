@@ -1,6 +1,7 @@
 package hclog
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"time"
@@ -49,25 +50,6 @@ func (l *multiLogger) logPlain(t time.Time, name string, level Level, msg string
 	for _, logger := range l.nestedLoggers {
 		logger.logPlain(t, name, level, msg, args)
 	}
-}
-
-// JSON logging function
-func (l *multiLogger) logJSON(t time.Time, name string, level Level, msg string, args ...interface{}) {
-	for _, logger := range l.nestedLoggers {
-		logger.logJSON(t, name, level, msg, args)
-	}
-}
-
-func (l multiLogger) jsonMapEntry(t time.Time, name string, level Level, msg string) map[string]interface{} {
-	m := map[string]interface{}{}
-	for _, logger := range l.nestedLoggers {
-		nestedM := logger.jsonMapEntry(t, name, level, msg)
-		for k, v := range nestedM {
-			m[k] = v
-		}
-	}
-
-	return m
 }
 
 // Emit the message and args at the provided level
@@ -186,7 +168,10 @@ func (l *multiLogger) ResetNamed(name string) Logger {
 
 func (l *multiLogger) ResetOutput(opts *LoggerOptions) error {
 	for _, logger := range l.nestedLoggers {
-		logger.ResetOutput(opts)
+		err := logger.ResetOutput(opts)
+		if err != nil {
+			fmt.Printf("ResetOutput: err: %+v\n", err)
+		}
 	}
 
 	return nil
@@ -194,7 +179,10 @@ func (l *multiLogger) ResetOutput(opts *LoggerOptions) error {
 
 func (l *multiLogger) ResetOutputWithFlush(opts *LoggerOptions, flushable Flushable) error {
 	for _, logger := range l.nestedLoggers {
-		logger.ResetOutputWithFlush(opts, flushable)
+		err := logger.ResetOutputWithFlush(opts, flushable)
+		if err != nil {
+			fmt.Printf("ResetOutputWithFlush: err: %+v\n", err)
+		}
 	}
 
 	return nil

@@ -143,6 +143,7 @@ func New(opts *LoggerOptions) Logger {
 			}
 		}
 
+		fmt.Printf("New: opts: %+v", opts)
 		aggregatedOpts = append(aggregatedOpts, opts)
 
 		return newMultiLogger(aggregatedOpts)
