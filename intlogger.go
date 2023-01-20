@@ -97,7 +97,7 @@ func New(opts *LoggerOptions) Logger {
 
 		for _, destination := range agentOptions {
 			if destination.LogFile != "" {
-				logFileName := destination.LogFile + destination.LogPath
+				logFileName := destination.LogPath + destination.LogFile
 
 				fmt.Printf("destination.LogFile = %v\n", destination.LogFile)
 				fmt.Printf("destination.LogMaxSize = %v\n", destination.LogMaxSize)
