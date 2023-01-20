@@ -1,8 +1,14 @@
 package hclog
 
 import (
+	"errors"
+	"fmt"
+	"os"
+	"strconv"
 	"sync"
 	"time"
+
+	lumberjack "github.com/TerminusDeus/lumberjack"
 )
 
 var (
@@ -66,7 +72,57 @@ func SetDefault(log Logger) Logger {
 }
 
 func SetAgentOptions(options []*LoggerOptions) {
-	agentOptions = options
+	agentOptions := make([]*LoggerOptions, 0, len(options))
+
+	for _, opts := range options {
+		if opts.LogFile != "" {
+			logFileName := opts.LogPath + opts.LogFile
+
+			fmt.Printf("opts.LogFile = %v\n", opts.LogFile)
+			fmt.Printf("opts.LogMaxSize = %v\n", opts.LogMaxSize)
+			fmt.Printf("opts.LogRotate = %v\n", opts.LogRotate)
+			fmt.Printf("opts.LogFormat = %v\n", opts.LogFormat)
+			fmt.Printf("opts.LogPath = %v\n", opts.LogPath)
+
+			if _, err := os.Stat(logFileName); err == nil {
+				_, err := os.OpenFile(logFileName, os.O_APPEND|os.O_WRONLY, 0644)
+				if err != nil {
+					panic(err)
+				}
+
+				logFileMaxSizeRaw := opts.LogMaxSize // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
+
+				var logFileMaxSize int
+				if logFileMaxSizeRaw != "" {
+					logFileMaxSize, err = strconv.Atoi(logFileMaxSizeRaw)
+					if err != nil {
+						panic(errors.New("bad value for logFileMaxSize: " + logFileMaxSizeRaw))
+					}
+				}
+
+				logFileTTLRaw := opts.LogRotate // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_AGE")
+
+				var logFileTTL int
+				if logFileTTLRaw != "" {
+					logFileTTL, err = strconv.Atoi(logFileTTLRaw)
+					if err != nil {
+						panic(errors.New("bad value for logFileTTL: " + logFileTTLRaw))
+					}
+				}
+
+				opts.JSONFormat = opts.LogFormat == "json"
+				opts.Level = LevelFromString(opts.LogLevel)
+
+				opts.Output = &lumberjack.Logger{
+					Filename: logFileName,
+					MaxSize:  logFileMaxSize, // megabytes
+					MaxAge:   logFileTTL,     //minutes
+				}
+			}
+			fmt.Printf("New: opts: %+v", opts)
+		}
+		agentOptions = append(agentOptions, opts)
+	}
 }
 
 // type VaultAgentOptions struct {
