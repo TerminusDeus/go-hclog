@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	agentOptions []*LoggerOptions
+	AgentOptions []*LoggerOptions
 
 	protect sync.Once
 	def     Logger
@@ -72,7 +72,7 @@ func SetDefault(log Logger) Logger {
 }
 
 func SetAgentOptions(options []*LoggerOptions) {
-	agentOptions := make([]*LoggerOptions, 0, len(options))
+	AgentOptions := make([]*LoggerOptions, 0, len(options))
 
 	for _, opts := range options {
 		if opts.LogFile != "" {
@@ -121,7 +121,7 @@ func SetAgentOptions(options []*LoggerOptions) {
 			}
 			fmt.Printf("New: opts: %+v", opts)
 		}
-		agentOptions = append(agentOptions, opts)
+		AgentOptions = append(AgentOptions, opts)
 	}
 }
 
