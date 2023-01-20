@@ -140,9 +140,10 @@ func New(opts *LoggerOptions) Logger {
 						MaxAge:   logFileTTL,     //minutes
 					}
 				}
+
+				fmt.Printf("New: opts: %+v", opts)
+				aggregatedOpts = append(aggregatedOpts, opts)
 			}
-			fmt.Printf("New: opts: %+v", opts)
-			aggregatedOpts = append(aggregatedOpts, opts)
 		}
 
 		return newMultiLogger(aggregatedOpts)
