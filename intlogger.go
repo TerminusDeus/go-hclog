@@ -20,9 +20,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	lumberjack "github.com/TerminusDeus/lumberjack"
 	"github.com/fatih/color"
-	"github.com/hashicorp/vault/sdk/helper/parseutil"
 )
 
 // TimeFormat is the time format to use for plain (non-JSON) output.
@@ -93,91 +91,7 @@ type intLogger struct {
 // New returns a configured logger.
 func New(opts *LoggerOptions) Logger {
 	// assumes that several destinations are set
-
-	logFileName := opts.LogPath
-
-	if logFileName != "" {
-		logFileName += opts.LogFile
-
-		if _, err := os.Stat(logFileName); err == nil {
-			f, err := os.OpenFile(logFileName, os.O_APPEND|os.O_WRONLY, 0644)
-			if err != nil {
-				panic(err)
-			}
-
-			f.Close()
-		} else {
-			panic(err)
-		}
-	} else {
-		logFileName += fmt.Sprintf("new_log_file_%s", time.Now().String())
-
-		f, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-		if err != nil {
-			panic(err)
-		}
-
-		f.Close()
-	}
-
-	fmt.Printf("opts.LogFile = %v\n", opts.LogFile)
-	fmt.Printf("opts.LogMaxSize = %v\n", opts.LogMaxSize)
-	fmt.Printf("opts.LogRotate = %v\n", opts.LogRotate)
-	fmt.Printf("opts.LogFormat = %v\n", opts.LogFormat)
-	fmt.Printf("opts.LogPath = %v\n", opts.LogPath)
-
-	logFileMaxSizeRaw := opts.LogMaxSize // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
-
-	var logFileMaxSize int
-	if logFileMaxSizeRaw != "" {
-
-		size, err := parseutil.ParseCapacityString(logFileMaxSizeRaw)
-		if err != nil {
-			panic(errors.New("bad value for log_max_size: " + logFileMaxSizeRaw))
-		}
-
-		fmt.Printf("parsed size: %+v", size)
-
-		logFileMaxSize = int(size)
-
-		// logFileMaxSize, err = strconv.Atoi(logFileMaxSizeRaw)
-		// if err != nil {
-		// 	panic(errors.New("bad value for logFileMaxSize: " + logFileMaxSizeRaw))
-		// }
-	}
-
-	logFileTTLRaw := opts.LogRotate // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_AGE")
-
-	var logFileTTL int
-
-	if logFileTTLRaw != "" {
-		dur, err := parseutil.ParseDurationSecond(logFileTTLRaw)
-		if err != nil {
-			panic(errors.New("bad value for log_rotate: " + logFileTTLRaw))
-		}
-
-		fmt.Printf("parsed duration: %+v", dur)
-
-		logFileTTL = int(dur.Seconds())
-		// logFileTTL, err = strconv.Atoi(logFileTTLRaw)
-		// if err != nil {
-		// 	panic(errors.New("bad value for logFileTTL: " + logFileTTLRaw))
-		// }
-	}
-
-	opts.JSONFormat = opts.LogFormat == "json"
-	opts.Level = LevelFromString(opts.LogLevel)
-
-	opts.Output = &lumberjack.Logger{
-		Filename: logFileName,
-		// MaxSize:  logFileMaxSize, // megabytes
-		MaxSize: logFileMaxSize, // bytes
-		// MaxAge:   logFileTTL,     // minutes
-		MaxAge: logFileTTL, // seconds
-	}
-
-	fmt.Printf("New: opts: %+v", opts)
-
+	prepareOptions(opts)
 	return newLogger(opts)
 }
 

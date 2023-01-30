@@ -75,9 +75,38 @@ func SetAgentOptions(options []*LoggerOptions) {
 	AgentOptions := make([]*LoggerOptions, 0, len(options))
 
 	for _, opts := range options {
-		logFileName := opts.LogPath
+		prepareOptions(opts)
 
-		if logFileName != "" {
+		AgentOptions = append(AgentOptions, opts)
+	}
+}
+
+// type VaultAgentOptions struct {
+// 	// vault agent specific options
+// 	LogRotate  string
+// 	LogMaxSize string
+// 	LogFile    string
+// 	LogPath    string
+// 	LogFormat  string
+// 	LogLevel   string
+// }
+
+func prepareOptions(opts *LoggerOptions) {
+	if opts.LogFile != "-" {
+		opts.JSONFormat = opts.LogFormat == "json"
+		opts.Level = LevelFromString(opts.LogLevel)
+
+		fmt.Printf("opts.LogFormat = %v\n", opts.LogFormat)
+		fmt.Printf("opts.LogLevel = %v\n", opts.LogLevel)
+
+		logFileName := opts.LogPath + "/"
+
+		fmt.Printf("opts.LogFile = %v\n", opts.LogFile)
+		fmt.Printf("opts.LogMaxSize = %v\n", opts.LogMaxSize)
+		fmt.Printf("opts.LogRotate = %v\n", opts.LogRotate)
+		fmt.Printf("opts.LogPath = %v\n", opts.LogPath)
+
+		if opts.LogFile != "" {
 			logFileName += opts.LogFile
 
 			if _, err := os.Stat(logFileName); err == nil {
@@ -100,12 +129,6 @@ func SetAgentOptions(options []*LoggerOptions) {
 
 			f.Close()
 		}
-
-		fmt.Printf("opts.LogFile = %v\n", opts.LogFile)
-		fmt.Printf("opts.LogMaxSize = %v\n", opts.LogMaxSize)
-		fmt.Printf("opts.LogRotate = %v\n", opts.LogRotate)
-		fmt.Printf("opts.LogFormat = %v\n", opts.LogFormat)
-		fmt.Printf("opts.LogPath = %v\n", opts.LogPath)
 
 		logFileMaxSizeRaw := opts.LogMaxSize // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
 
@@ -146,9 +169,6 @@ func SetAgentOptions(options []*LoggerOptions) {
 			// }
 		}
 
-		opts.JSONFormat = opts.LogFormat == "json"
-		opts.Level = LevelFromString(opts.LogLevel)
-
 		opts.Output = &lumberjack.Logger{
 			Filename: logFileName,
 			// MaxSize:  logFileMaxSize, // megabytes
@@ -157,18 +177,6 @@ func SetAgentOptions(options []*LoggerOptions) {
 			MaxAge: logFileTTL, // seconds
 		}
 
-		fmt.Printf("New: opts: %+v", opts)
-
-		AgentOptions = append(AgentOptions, opts)
+		fmt.Printf("Prepared file opts: %+v", opts)
 	}
 }
-
-// type VaultAgentOptions struct {
-// 	// vault agent specific options
-// 	LogRotate  string
-// 	LogMaxSize string
-// 	LogFile    string
-// 	LogPath    string
-// 	LogFormat  string
-// 	LogLevel   string
-// }
