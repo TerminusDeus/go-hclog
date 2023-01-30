@@ -99,84 +99,87 @@ func prepareOptions(opts *LoggerOptions) {
 		fmt.Printf("opts.LogFormat = %v\n", opts.LogFormat)
 		fmt.Printf("opts.LogLevel = %v\n", opts.LogLevel)
 
-		logFileName := opts.LogPath + "/"
-
 		fmt.Printf("opts.LogFile = %v\n", opts.LogFile)
 		fmt.Printf("opts.LogMaxSize = %v\n", opts.LogMaxSize)
 		fmt.Printf("opts.LogRotate = %v\n", opts.LogRotate)
 		fmt.Printf("opts.LogPath = %v\n", opts.LogPath)
 
-		if opts.LogFile != "" {
-			logFileName += opts.LogFile
+		if opts.LogPath != "" {
+			logFileName := opts.LogPath + "/"
 
-			if _, err := os.Stat(logFileName); err == nil {
-				f, err := os.OpenFile(logFileName, os.O_APPEND|os.O_WRONLY, 0644)
+			if opts.LogFile != "" {
+				logFileName += opts.LogFile
+
+				if _, err := os.Stat(logFileName); err == nil {
+					f, err := os.OpenFile(logFileName, os.O_APPEND|os.O_WRONLY, 0644)
+					if err != nil {
+						panic(err)
+					}
+
+					f.Close()
+				} else {
+					panic(err)
+				}
+			} else {
+				logFileName += fmt.Sprintf("new_log_file_%s", time.Now().String())
+
+				f, err := os.Create(logFileName)
 				if err != nil {
 					panic(err)
 				}
+				fmt.Printf("Name of new file: %s\n", f.Name())
 
 				f.Close()
-			} else {
-				panic(err)
-			}
-		} else {
-			logFileName += fmt.Sprintf("new_log_file_%s", time.Now().String())
-
-			f, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-			if err != nil {
-				panic(err)
 			}
 
-			f.Close()
-		}
+			logFileMaxSizeRaw := opts.LogMaxSize // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
 
-		logFileMaxSizeRaw := opts.LogMaxSize // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
+			var logFileMaxSize int
+			if logFileMaxSizeRaw != "" {
 
-		var logFileMaxSize int
-		if logFileMaxSizeRaw != "" {
+				size, err := parseutil.ParseCapacityString(logFileMaxSizeRaw)
+				if err != nil {
+					panic(errors.New("bad value for log_max_size: " + logFileMaxSizeRaw))
+				}
 
-			size, err := parseutil.ParseCapacityString(logFileMaxSizeRaw)
-			if err != nil {
-				panic(errors.New("bad value for log_max_size: " + logFileMaxSizeRaw))
+				fmt.Printf("parsed size: %+v", size)
+
+				logFileMaxSize = int(size)
+
+				// logFileMaxSize, err = strconv.Atoi(logFileMaxSizeRaw)
+				// if err != nil {
+				// 	panic(errors.New("bad value for logFileMaxSize: " + logFileMaxSizeRaw))
+				// }
 			}
 
-			fmt.Printf("parsed size: %+v", size)
+			logFileTTLRaw := opts.LogRotate // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_AGE")
 
-			logFileMaxSize = int(size)
+			var logFileTTL int
 
-			// logFileMaxSize, err = strconv.Atoi(logFileMaxSizeRaw)
-			// if err != nil {
-			// 	panic(errors.New("bad value for logFileMaxSize: " + logFileMaxSizeRaw))
-			// }
-		}
+			if logFileTTLRaw != "" {
+				dur, err := parseutil.ParseDurationSecond(logFileTTLRaw)
+				if err != nil {
+					panic(errors.New("bad value for log_rotate: " + logFileTTLRaw))
+				}
 
-		logFileTTLRaw := opts.LogRotate // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_AGE")
+				fmt.Printf("parsed duration: %+v", dur)
 
-		var logFileTTL int
-
-		if logFileTTLRaw != "" {
-			dur, err := parseutil.ParseDurationSecond(logFileTTLRaw)
-			if err != nil {
-				panic(errors.New("bad value for log_rotate: " + logFileTTLRaw))
+				logFileTTL = int(dur.Seconds())
+				// logFileTTL, err = strconv.Atoi(logFileTTLRaw)
+				// if err != nil {
+				// 	panic(errors.New("bad value for logFileTTL: " + logFileTTLRaw))
+				// }
 			}
 
-			fmt.Printf("parsed duration: %+v", dur)
+			opts.Output = &lumberjack.Logger{
+				Filename: logFileName,
+				// MaxSize:  logFileMaxSize, // megabytes
+				MaxSize: logFileMaxSize, // bytes
+				// MaxAge:   logFileTTL,     // minutes
+				MaxAge: logFileTTL, // seconds
+			}
 
-			logFileTTL = int(dur.Seconds())
-			// logFileTTL, err = strconv.Atoi(logFileTTLRaw)
-			// if err != nil {
-			// 	panic(errors.New("bad value for logFileTTL: " + logFileTTLRaw))
-			// }
+			fmt.Printf("Prepared file opts: %+v", opts)
 		}
-
-		opts.Output = &lumberjack.Logger{
-			Filename: logFileName,
-			// MaxSize:  logFileMaxSize, // megabytes
-			MaxSize: logFileMaxSize, // bytes
-			// MaxAge:   logFileTTL,     // minutes
-			MaxAge: logFileTTL, // seconds
-		}
-
-		fmt.Printf("Prepared file opts: %+v", opts)
 	}
 }
