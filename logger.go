@@ -289,12 +289,14 @@ type LoggerOptions struct {
 	// logger will not affect any subloggers, and SetLevel on any subloggers
 	// will not affect the parent or sibling loggers.
 	IndependentLevels bool
-	LogRotate         string
-	LogMaxSize        string
-	LogFile           string
-	LogPath           string
-	LogFormat         string
-	LogLevel          string
+
+	// Agent based options
+	LogRotate  string
+	LogMaxSize string
+	LogFile    string
+	LogPath    string
+	LogFormat  string
+	LogLevel   string
 }
 
 // InterceptLogger describes the interface for using a logger

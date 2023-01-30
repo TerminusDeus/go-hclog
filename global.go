@@ -74,6 +74,7 @@ func SetDefault(log Logger) Logger {
 func SetAgentOptions(options []*LoggerOptions) {
 	AgentOptions := make([]*LoggerOptions, 0, len(options))
 
+	// assumes that several destinations are set
 	for _, opts := range options {
 		prepareOptions(opts)
 
@@ -81,28 +82,10 @@ func SetAgentOptions(options []*LoggerOptions) {
 	}
 }
 
-// type VaultAgentOptions struct {
-// 	// vault agent specific options
-// 	LogRotate  string
-// 	LogMaxSize string
-// 	LogFile    string
-// 	LogPath    string
-// 	LogFormat  string
-// 	LogLevel   string
-// }
-
 func prepareOptions(opts *LoggerOptions) {
 	if opts.LogFile != "-" {
 		opts.JSONFormat = opts.LogFormat == "json"
 		opts.Level = LevelFromString(opts.LogLevel)
-
-		fmt.Printf("opts.LogFormat = %v\n", opts.LogFormat)
-		fmt.Printf("opts.LogLevel = %v\n", opts.LogLevel)
-
-		fmt.Printf("opts.LogFile = %v\n", opts.LogFile)
-		fmt.Printf("opts.LogMaxSize = %v\n", opts.LogMaxSize)
-		fmt.Printf("opts.LogRotate = %v\n", opts.LogRotate)
-		fmt.Printf("opts.LogPath = %v\n", opts.LogPath)
 
 		if opts.LogPath != "" {
 			logFileName := opts.LogPath + "/"
@@ -127,12 +110,11 @@ func prepareOptions(opts *LoggerOptions) {
 				if err != nil {
 					panic(err)
 				}
-				fmt.Printf("Name of new file: %s\n", f.Name())
 
 				f.Close()
 			}
 
-			logFileMaxSizeRaw := opts.LogMaxSize // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_SIZE")
+			logFileMaxSizeRaw := opts.LogMaxSize
 
 			var logFileMaxSize int
 			if logFileMaxSizeRaw != "" {
@@ -142,17 +124,10 @@ func prepareOptions(opts *LoggerOptions) {
 					panic(errors.New("bad value for log_max_size: " + logFileMaxSizeRaw))
 				}
 
-				fmt.Printf("parsed size: %+v", size)
-
 				logFileMaxSize = int(size)
-
-				// logFileMaxSize, err = strconv.Atoi(logFileMaxSizeRaw)
-				// if err != nil {
-				// 	panic(errors.New("bad value for logFileMaxSize: " + logFileMaxSizeRaw))
-				// }
 			}
 
-			logFileTTLRaw := opts.LogRotate // os.Getenv("VAULT_AGENT_LOG_FILE_MAX_AGE")
+			logFileTTLRaw := opts.LogRotate
 
 			var logFileTTL int
 
@@ -162,24 +137,14 @@ func prepareOptions(opts *LoggerOptions) {
 					panic(errors.New("bad value for log_rotate: " + logFileTTLRaw))
 				}
 
-				fmt.Printf("parsed duration: %+v", dur)
-
 				logFileTTL = int(dur.Seconds())
-				// logFileTTL, err = strconv.Atoi(logFileTTLRaw)
-				// if err != nil {
-				// 	panic(errors.New("bad value for logFileTTL: " + logFileTTLRaw))
-				// }
 			}
 
 			opts.Output = &lumberjack.Logger{
 				Filename: logFileName,
-				// MaxSize:  logFileMaxSize, // megabytes
-				MaxSize: logFileMaxSize, // bytes
-				// MaxAge:   logFileTTL,     // minutes
-				MaxAge: logFileTTL, // seconds
+				MaxSize:  logFileMaxSize, // bytes
+				MaxAge:   logFileTTL,     // seconds
 			}
-
-			fmt.Printf("Prepared file opts: %+v", opts)
 		}
 	}
 }

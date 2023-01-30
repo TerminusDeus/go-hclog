@@ -90,8 +90,8 @@ type intLogger struct {
 
 // New returns a configured logger.
 func New(opts *LoggerOptions) Logger {
-	// assumes that several destinations are set
 	prepareOptions(opts)
+
 	return newLogger(opts)
 }
 
