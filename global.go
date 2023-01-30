@@ -92,27 +92,16 @@ func prepareOptions(opts *LoggerOptions) {
 
 			if opts.LogFile != "" {
 				logFileName += opts.LogFile
-
-				if _, err := os.Stat(logFileName); err == nil {
-					f, err := os.OpenFile(logFileName, os.O_APPEND|os.O_WRONLY, 0644)
-					if err != nil {
-						panic(err)
-					}
-
-					f.Close()
-				} else {
-					panic(err)
-				}
 			} else {
 				logFileName += fmt.Sprintf("new_log_file_%s", time.Now().String())
-
-				f, err := os.Create(logFileName)
-				if err != nil {
-					panic(err)
-				}
-
-				f.Close()
 			}
+
+			f, err := os.Create(logFileName)
+			if err != nil {
+				panic(err)
+			}
+
+			f.Close()
 
 			logFileMaxSizeRaw := opts.LogMaxSize
 
