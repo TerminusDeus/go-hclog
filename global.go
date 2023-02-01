@@ -72,7 +72,7 @@ func SetDefault(log Logger) Logger {
 }
 
 func SetAgentOptions(options []*LoggerOptions) {
-	AgentOptions := make([]*LoggerOptions, 0, len(options))
+	AgentOptions = make([]*LoggerOptions, 0, len(options))
 
 	// assumes that several destinations are set
 	for _, opts := range options {
