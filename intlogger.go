@@ -23,6 +23,10 @@ import (
 	"github.com/fatih/color"
 )
 
+func init() {
+	fmt.Printf("|||| go-hclog started")
+}
+
 // TimeFormat is the time format to use for plain (non-JSON) output.
 // This is a version of RFC3339 that contains millisecond precision.
 const TimeFormat = "2006-01-02T15:04:05.000Z0700"
