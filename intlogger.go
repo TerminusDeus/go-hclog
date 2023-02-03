@@ -94,6 +94,8 @@ type intLogger struct {
 
 // New returns a configured logger.
 func New(opts *LoggerOptions) Logger {
+	fmt.Printf("|||| New opts = %+v\n", opts)
+
 	prepareOptions(opts)
 
 	return newLogger(opts)
