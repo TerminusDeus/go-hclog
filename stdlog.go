@@ -83,6 +83,7 @@ func (s *stdlogAdapter) pickLevel(str string) (Level, string) {
 	case strings.HasPrefix(str, "[ERR]"):
 		return Error, strings.TrimSpace(str[5:])
 	default:
+		fmt.Printf("pickLevel: str = %s\n", str)
 		return Info, str
 	}
 }
