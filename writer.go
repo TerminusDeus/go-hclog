@@ -19,6 +19,8 @@ func newWriter(w io.Writer, color ColorOption) *writer {
 func (w *writer) Flush(level Level) (err error) {
 	var unwritten = w.b.Bytes()
 
+	fmt.Printf("||||||| Flush: w.b.Bytes() = %+v\n", string(w.b.Bytes()))
+
 	if w.color != ColorOff {
 		color := _levelToColor[level]
 		unwritten = []byte(color.Sprintf("%s", unwritten))
@@ -44,9 +46,7 @@ func (w *writer) Write(p []byte) (int, error) {
 	// 	l.l.Println(string(bytes.TrimRight(b, " \n\t")))
 	// }
 
-	// return w.b.Write(p)
-
-	return len(p), nil
+	return w.b.Write(p)
 }
 
 func (w *writer) WriteByte(c byte) error {
