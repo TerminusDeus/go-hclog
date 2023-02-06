@@ -2,6 +2,7 @@ package hclog
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"regexp"
 	"strings"
@@ -24,6 +25,8 @@ type stdlogAdapter struct {
 // Take the data, infer the levels if configured, and send it through
 // a regular Logger.
 func (s *stdlogAdapter) Write(data []byte) (int, error) {
+	fmt.Printf("||| Write: data = %+v\n", string(data))
+
 	str := string(bytes.TrimRight(data, " \t\n"))
 
 	if s.forceLevel != NoLevel {
@@ -94,6 +97,8 @@ type logWriter struct {
 }
 
 func (l *logWriter) Write(b []byte) (int, error) {
+	fmt.Printf("||| Write: b = %+v\n", string(b))
+
 	l.l.Println(string(bytes.TrimRight(b, " \n\t")))
 	return len(b), nil
 }

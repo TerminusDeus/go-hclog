@@ -2,6 +2,7 @@ package hclog
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 )
 
@@ -33,6 +34,8 @@ func (w *writer) Flush(level Level) (err error) {
 }
 
 func (w *writer) Write(p []byte) (int, error) {
+	fmt.Printf("||| Write: p = %+v\n", string(p))
+
 	return w.b.Write(p)
 }
 
@@ -69,11 +72,15 @@ func NewLeveledWriter(standard io.Writer, overrides map[Level]io.Writer) *Levele
 
 // Write implements io.Writer.
 func (lw *LeveledWriter) Write(p []byte) (int, error) {
+	fmt.Printf("||| LeveledWriter Write: p = %+v\n", string(p))
+
 	return lw.standard.Write(p)
 }
 
 // LevelWrite implements LevelWriter.
 func (lw *LeveledWriter) LevelWrite(level Level, p []byte) (int, error) {
+	fmt.Printf("||| LevelWrite Write: p = %+v\n", string(p))
+
 	w, ok := lw.overrides[level]
 	if !ok {
 		w = lw.standard

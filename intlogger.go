@@ -493,6 +493,8 @@ var bufPool = sync.Pool{
 }
 
 func writeEscapedForOutput(w io.Writer, str string, escapeQuotes bool) {
+	fmt.Printf("||| writeEscapedForOutput: str = %+v\n", str)
+
 	if !needsEscaping(str) {
 		w.Write([]byte(str))
 		return
