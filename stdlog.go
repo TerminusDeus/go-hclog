@@ -96,10 +96,11 @@ type logWriter struct {
 	l *log.Logger
 }
 
-func (l *logWriter) Write(b []byte) (int, error) {
-	fmt.Printf("||| Write: b = %+v\n", string(b))
+var lg = New(DefaultOptions)
 
+func (l *logWriter) Write(b []byte) (int, error) {
 	l.l.Println(string(bytes.TrimRight(b, " \n\t")))
+
 	return len(b), nil
 }
 
