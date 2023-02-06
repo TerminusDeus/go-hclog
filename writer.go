@@ -36,7 +36,7 @@ func (w *writer) Flush(level Level) (err error) {
 func (w *writer) Write(p []byte) (int, error) {
 	fmt.Printf("||||||| Write: p = %+v\n", string(p))
 
-	lg.Log(Trace, "||||||| "+string(p))
+	// lg.Log(Trace, "||||||| "+string(p))
 
 	// if strings.Contains(string(b), "||||") {
 	// 	fmt.Printf("|||| string(b) = %s\n", string(b))
@@ -44,7 +44,9 @@ func (w *writer) Write(p []byte) (int, error) {
 	// 	l.l.Println(string(bytes.TrimRight(b, " \n\t")))
 	// }
 
-	return w.b.Write(p)
+	// return w.b.Write(p)
+
+	return len(p), nil
 }
 
 func (w *writer) WriteByte(c byte) error {
