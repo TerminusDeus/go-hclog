@@ -23,9 +23,9 @@ import (
 	"github.com/fatih/color"
 )
 
-func init() {
-	fmt.Printf("|||| go-hclog started: os.Args[1:]: %v", os.Args[1:])
-}
+// func init() {
+// 	fmt.Printf("|||| go-hclog started: os.Args[1:]: %v", os.Args[1:])
+// }
 
 // TimeFormat is the time format to use for plain (non-JSON) output.
 // This is a version of RFC3339 that contains millisecond precision.
@@ -94,7 +94,7 @@ type intLogger struct {
 
 // New returns a configured logger.
 func New(opts *LoggerOptions) Logger {
-	fmt.Printf("|||| New opts = %+v\n", opts)
+	// fmt.Printf("|||| New opts = %+v\n", opts)
 	// opts.Level = LevelFromString(opts.LogLevel)
 	opts.Level = Trace
 	// prepareOptions(opts)
@@ -205,7 +205,7 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 
 	if len(AgentOptions) > 0 {
 		for _, agentOption := range AgentOptions {
-			fmt.Printf("||||||| Agent option: %#v\n\n", agentOption)
+			// fmt.Printf("||||||| Agent option: %#v\n\n", agentOption)
 
 			if agentOption.Level == level || agentOption.Level == Trace {
 				if agentOption.JSONFormat {
@@ -213,7 +213,7 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 				} else {
 					l.logPlain(t, name, level, msg, args...)
 				}
-				fmt.Printf("||||||| string(l.writer.b.Bytes()): ||||||   %s   |||||| \n", string(l.writer.b.Bytes()))
+				// fmt.Printf("||||||| string(l.writer.b.Bytes()): ||||||   %s   |||||| \n", string(l.writer.b.Bytes()))
 
 				fmt.Fprintln(agentOption.Output, string(l.writer.b.Bytes()))
 				l.writer.b.Reset()
@@ -511,7 +511,7 @@ var bufPool = sync.Pool{
 }
 
 func writeEscapedForOutput(w io.Writer, str string, escapeQuotes bool) {
-	fmt.Printf("||| writeEscapedForOutput: str = %+v\n", str)
+	// fmt.Printf("||| writeEscapedForOutput: str = %+v\n", str)
 
 	if !needsEscaping(str) {
 		w.Write([]byte(str))

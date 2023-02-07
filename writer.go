@@ -2,7 +2,6 @@ package hclog
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 )
 
@@ -19,7 +18,7 @@ func newWriter(w io.Writer, color ColorOption) *writer {
 func (w *writer) Flush(level Level) (err error) {
 	var unwritten = w.b.Bytes()
 
-	fmt.Printf("||||||| Flush: w.b.Bytes() = %+v\n", string(w.b.Bytes()))
+	// fmt.Printf("||||||| Flush: w.b.Bytes() = %+v\n", string(w.b.Bytes()))
 
 	if w.color != ColorOff {
 		color := _levelToColor[level]
@@ -36,7 +35,7 @@ func (w *writer) Flush(level Level) (err error) {
 }
 
 func (w *writer) Write(p []byte) (int, error) {
-	fmt.Printf("||||||| Write: p = %+v\n", string(p))
+	// fmt.Printf("||||||| Write: p = %+v\n", string(p))
 
 	// lg.Log(Trace, "||||||| "+string(p))
 
@@ -82,14 +81,14 @@ func NewLeveledWriter(standard io.Writer, overrides map[Level]io.Writer) *Levele
 
 // Write implements io.Writer.
 func (lw *LeveledWriter) Write(p []byte) (int, error) {
-	fmt.Printf("||| LeveledWriter Write: p = %+v\n", string(p))
+	// fmt.Printf("||| LeveledWriter Write: p = %+v\n", string(p))
 
 	return lw.standard.Write(p)
 }
 
 // LevelWrite implements LevelWriter.
 func (lw *LeveledWriter) LevelWrite(level Level, p []byte) (int, error) {
-	fmt.Printf("||| LevelWrite Write: p = %+v\n", string(p))
+	// fmt.Printf("||| LevelWrite Write: p = %+v\n", string(p))
 
 	w, ok := lw.overrides[level]
 	if !ok {

@@ -2,7 +2,6 @@ package hclog
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"regexp"
 	"strings"
@@ -25,7 +24,7 @@ type stdlogAdapter struct {
 // Take the data, infer the levels if configured, and send it through
 // a regular Logger.
 func (s *stdlogAdapter) Write(data []byte) (int, error) {
-	fmt.Printf("||| Write: data = %+v\n", string(data))
+	// fmt.Printf("||| Write: data = %+v\n", string(data))
 
 	str := string(bytes.TrimRight(data, " \t\n"))
 
@@ -83,7 +82,7 @@ func (s *stdlogAdapter) pickLevel(str string) (Level, string) {
 	case strings.HasPrefix(str, "[ERR]"):
 		return Error, strings.TrimSpace(str[5:])
 	default:
-		fmt.Printf("pickLevel: str = %s\n", str)
+		// fmt.Printf("pickLevel: str = %s\n", str)
 		return Info, str
 	}
 }
