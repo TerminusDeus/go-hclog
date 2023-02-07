@@ -207,7 +207,7 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 		for _, agentOption := range AgentOptions {
 			// fmt.Printf("||||||| Agent option: %#v\n\n", agentOption)
 
-			if agentOption.Level == level || agentOption.Level == Trace {
+			if agentOption.Level == Trace || agentOption.Level >= level {
 				if agentOption.JSONFormat {
 					l.logJSON(t, name, level, msg, args...)
 				} else {
@@ -216,6 +216,7 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 				// fmt.Printf("||||||| string(l.writer.b.Bytes()): ||||||   %s   |||||| \n", string(l.writer.b.Bytes()))
 
 				fmt.Fprintln(agentOption.Output, string(l.writer.b.Bytes()))
+
 				l.writer.b.Reset()
 			}
 		}
