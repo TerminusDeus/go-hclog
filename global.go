@@ -83,10 +83,10 @@ func SetAgentOptions(options []*LoggerOptions) {
 }
 
 func prepareOptions(opts *LoggerOptions) {
-	if opts.LogFile != "-" {
-		opts.JSONFormat = opts.LogFormat == "json"
-		opts.Level = LevelFromString(opts.LogLevel)
+	opts.JSONFormat = opts.LogFormat == "json"
+	opts.Level = LevelFromString(opts.LogLevel)
 
+	if opts.LogFile != "-" {
 		if opts.LogPath != "" {
 			logFileName := opts.LogPath + "/"
 
@@ -135,5 +135,7 @@ func prepareOptions(opts *LoggerOptions) {
 				MaxAge:   logFileTTL,     // seconds
 			}
 		}
+	} else {
+		opts.Output = os.Stdout
 	}
 }
