@@ -213,7 +213,7 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 				} else {
 					l.logPlain(t, name, level, msg, args...)
 				}
-				fmt.Printf("||||||| string(l.writer.b.Bytes()): %s\n", string(l.writer.b.Bytes()))
+				fmt.Printf("||||||| string(l.writer.b.Bytes()): ||||||   %s   |||||| \n", string(l.writer.b.Bytes()))
 
 				fmt.Fprintln(agentOption.Output, string(l.writer.b.Bytes()))
 			}
