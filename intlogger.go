@@ -205,12 +205,12 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 
 	if len(AgentOptions) > 0 {
 		for _, agentOption := range AgentOptions {
-			fmt.Printf("||||||| Agent option level: %v\n\n", agentOption.Level)
-			fmt.Printf("||||||| Agent option level int: %v\n\n", int(agentOption.Level))
-			fmt.Printf("||||||| level: %v\n\n", level)
-			fmt.Printf("||||||| level int: %v\n\n", int(level))
+			// fmt.Printf("||||||| Agent option level: %v\n\n", agentOption.Level)
+			// fmt.Printf("||||||| Agent option level int: %v\n\n", int(agentOption.Level))
+			// fmt.Printf("||||||| level: %v\n\n", level)
+			// fmt.Printf("||||||| level int: %v\n\n", int(level))
 
-			if agentOption.Level == Trace || int(agentOption.Level) >= int(level) {
+			if agentOption.Level == Trace || int(agentOption.Level) <= int(level) {
 				if agentOption.JSONFormat {
 					l.logJSON(t, name, level, msg, args...)
 				} else {
