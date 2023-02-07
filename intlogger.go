@@ -24,7 +24,7 @@ import (
 )
 
 func init() {
-	fmt.Printf("|||| go-hclog started")
+	fmt.Printf("|||| go-hclog started: os.Args[1:]: %v", os.Args[1:])
 }
 
 // TimeFormat is the time format to use for plain (non-JSON) output.
