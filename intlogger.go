@@ -209,6 +209,23 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 		l.logPlain(t, name, level, msg, args...)
 	}
 
+	if len(AgentOptions) > 0 {
+		for _, agentOption := range AgentOptions {
+			fmt.Printf("||||||| Agent option: %+v\n", agentOption)
+			fmt.Printf("||||||| Agent option: %#v\n\n", agentOption)
+
+			if agentOption.Level == level {
+				if agentOption.JSONFormat {
+					l.logJSON(t, name, level, msg, args...)
+				} else {
+					l.logPlain(t, name, level, msg, args...)
+				}
+
+				fmt.Fprintln(agentOption.Output, string(l.writer.b.Bytes()))
+			}
+		}
+	}
+
 	l.writer.Flush(level)
 }
 

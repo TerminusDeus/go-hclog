@@ -19,10 +19,6 @@ func newWriter(w io.Writer, color ColorOption) *writer {
 func (w *writer) Flush(level Level) (err error) {
 	var unwritten = w.b.Bytes()
 
-	for _, agentOption := range AgentOptions {
-		fmt.Printf("||||||| Agent option: %v", agentOption)
-	}
-
 	fmt.Printf("||||||| Flush: w.b.Bytes() = %+v\n", string(w.b.Bytes()))
 
 	if w.color != ColorOff {
