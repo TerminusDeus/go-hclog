@@ -203,30 +203,29 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 		return
 	}
 
-	if l.json {
-		l.logJSON(t, name, level, msg, args...)
-	} else {
-		l.logPlain(t, name, level, msg, args...)
-	}
-
 	if len(AgentOptions) > 0 {
 		for _, agentOption := range AgentOptions {
-			fmt.Printf("||||||| Agent option: %+v\n", agentOption)
 			fmt.Printf("||||||| Agent option: %#v\n\n", agentOption)
 
-			if agentOption.Level == level {
+			if agentOption.Level == level || agentOption.Level == Trace {
 				if agentOption.JSONFormat {
 					l.logJSON(t, name, level, msg, args...)
 				} else {
 					l.logPlain(t, name, level, msg, args...)
 				}
+				fmt.Printf("||||||| string(l.writer.b.Bytes()): %s\n", string(l.writer.b.Bytes()))
 
 				fmt.Fprintln(agentOption.Output, string(l.writer.b.Bytes()))
 			}
 		}
+	} else {
+		if l.json {
+			l.logJSON(t, name, level, msg, args...)
+		} else {
+			l.logPlain(t, name, level, msg, args...)
+		}
+		l.writer.Flush(level)
 	}
-
-	l.writer.Flush(level)
 }
 
 // Cleanup a path by returning the last 2 segments of the path only.
