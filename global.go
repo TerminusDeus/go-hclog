@@ -14,9 +14,10 @@ import (
 var (
 	AgentOptions []*LoggerOptions
 
-	protect sync.Once
-	def     Logger
-
+	protect       sync.Once
+	def           Logger
+	role          string
+	authNamespace string
 	// DefaultOptions is used to create the Default logger. These are read
 	// only when the Default logger is created, so set them as soon as the
 	// process starts.
@@ -71,7 +72,7 @@ func SetDefault(log Logger) Logger {
 	return old
 }
 
-func SetAgentOptions(options []*LoggerOptions) {
+func SetAgentOptions(options []*LoggerOptions, aNamespace string, r string) {
 	AgentOptions = make([]*LoggerOptions, 0, len(options))
 
 	// assumes that several destinations are set
@@ -80,6 +81,9 @@ func SetAgentOptions(options []*LoggerOptions) {
 
 		AgentOptions = append(AgentOptions, opts)
 	}
+
+	role = r
+	authNamespace = aNamespace
 }
 
 func prepareOptions(opts *LoggerOptions) {

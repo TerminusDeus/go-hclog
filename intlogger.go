@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"reflect"
@@ -205,10 +206,29 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 
 	if len(AgentOptions) > 0 {
 		for _, agentOption := range AgentOptions {
+			hostName, err := os.Hostname()
+			if err == nil {
+				args = append(args, "podhostname", hostName)
+			}
+
+			podNamespaceFilePath := "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+			buf, err := ioutil.ReadFile(podNamespaceFilePath)
+			if err == nil {
+				args = append(args, "projectname", string(buf))
+			}
+
+			if role != "" {
+				args = append(args, "role", role)
+			}
+
+			if authNamespace != "" {
+				args = append(args, "namespace", authNamespace)
+			}
+
 			// fmt.Printf("||||||| Agent option level: %v\n\n", agentOption.Level)
 			// fmt.Printf("||||||| Agent option level int: %v\n\n", int(agentOption.Level))
 			// fmt.Printf("||||||| level: %v\n\n", level)
-			// fmt.Printf("||||||| level int: %v\n\n", int(level))
+			// fmt.Printf("||||||| level int: %v\n\n", int(level)
 
 			if agentOption.Level == Trace || int(agentOption.Level) <= int(level) {
 				if agentOption.JSONFormat {
