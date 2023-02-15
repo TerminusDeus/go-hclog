@@ -179,7 +179,7 @@ func newLogger(opts *LoggerOptions) *intLogger {
 	}
 
 	if isAgent {
-		l.timeFn = time.Now
+		l.timeFn = NowWithUTC
 		l.timeFormat = TimeFormatJSON //TimeFormatAgent
 	}
 
@@ -188,6 +188,10 @@ func newLogger(opts *LoggerOptions) *intLogger {
 	atomic.StoreInt32(l.level, int32(level))
 
 	return l
+}
+
+func NowWithUTC() time.Time {
+	return time.Now().In(time.UTC)
 }
 
 // offsetIntLogger is the stack frame offset in the call stack for the caller to
