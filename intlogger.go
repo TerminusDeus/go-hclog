@@ -222,27 +222,7 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 	}
 
 	if len(logDestinations) > 0 {
-		hostname, err := os.Hostname()
-		if err == nil {
-			args = append(args, "hostname", hostname)
-		}
-
-		buf, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-		if err == nil {
-			args = append(args, "projectname", string(buf))
-		}
-
-		if identity != "" {
-			args = append(args, "identity", identity)
-		}
-
-		if namespace != "" {
-			args = append(args, "namespace", namespace)
-		}
-
-		if method != "" {
-			args = append(args, "method", method)
-		}
+		args = populateAgentArgs(args)
 
 		for _, logDestination := range logDestinations {
 			if logDestination.Level == Trace || int(logDestination.Level) <= int(level) {
@@ -278,6 +258,8 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 			logLevel = DefaultLevel
 		}
 
+		args = populateAgentArgs(args)
+
 		logFormat := strings.ToLower(strings.TrimSpace(os.Getenv("VAULT_LOG_FORMAT")))
 		if logLevel == Trace || int(logLevel) <= int(level) {
 			if logFormat == "json" {
@@ -288,6 +270,32 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 			l.writer.Flush(level)
 		}
 	}
+}
+
+func populateAgentArgs(args []interface{}) []interface{} {
+	hostname, err := os.Hostname()
+	if err == nil {
+		args = append(args, "hostname", hostname)
+	}
+
+	buf, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	if err == nil {
+		args = append(args, "projectname", string(buf))
+	}
+
+	if identity != "" {
+		args = append(args, "identity", identity)
+	}
+
+	if namespace != "" {
+		args = append(args, "namespace", namespace)
+	}
+
+	if method != "" {
+		args = append(args, "method", method)
+	}
+
+	return args
 }
 
 // Cleanup a path by returning the last 2 segments of the path only.
