@@ -93,12 +93,9 @@ type intLogger struct {
 
 // New returns a configured logger.
 func New(opts *LoggerOptions) Logger {
-	// fmt.Printf("|||| New opts = %+v\n", opts)
-	// opts.Level = LevelFromString(opts.LogLevel)
 	if isAgent {
 		opts.Level = Trace
 	}
-	// prepareOptions(opts)
 
 	return newLogger(opts)
 }
@@ -225,10 +222,6 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 	}
 
 	if len(logDestinations) > 0 {
-		for _, arg := range args {
-			fmt.Printf("||||||| arg: %v\n\n", arg)
-		}
-
 		hostname, err := os.Hostname()
 		if err == nil {
 			args = append(args, "hostname", hostname)
@@ -252,18 +245,12 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 		}
 
 		for _, logDestination := range logDestinations {
-			// fmt.Printf("||||||| Agent option level: %v\n\n", agentOption.Level)
-			// fmt.Printf("||||||| Agent option level int: %v\n\n", int(agentOption.Level))
-			// fmt.Printf("||||||| level: %v\n\n", level)
-			// fmt.Printf("||||||| level int: %v\n\n", int(level)
-
 			if logDestination.Level == Trace || int(logDestination.Level) <= int(level) {
 				if logDestination.JSONFormat {
 					l.logJSON(t, name, level, msg, args...)
 				} else {
 					l.logPlain(t, name, level, msg, args...)
 				}
-				// fmt.Printf("||||||| string(l.writer.b.Bytes()): ||||||   %s   |||||| \n", string(l.writer.b.Bytes()))
 
 				fmt.Fprintf(logDestination.Output, string(l.writer.b.Bytes()))
 
@@ -585,8 +572,6 @@ var bufPool = sync.Pool{
 }
 
 func writeEscapedForOutput(w io.Writer, str string, escapeQuotes bool) {
-	// fmt.Printf("||| writeEscapedForOutput: str = %+v\n", str)
-
 	if !needsEscaping(str) {
 		w.Write([]byte(str))
 		return
