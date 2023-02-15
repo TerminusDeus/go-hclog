@@ -179,8 +179,8 @@ func newLogger(opts *LoggerOptions) *intLogger {
 	}
 
 	if isAgent {
-		l.timeFn = time.Now().UTC
-		l.timeFormat = TimeFormatAgent
+		l.timeFn = time.Now
+		l.timeFormat = TimeFormatJSON //TimeFormatAgent
 	}
 
 	l.setColorization(opts)
