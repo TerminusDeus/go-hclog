@@ -88,14 +88,12 @@ func ConfigureAgentLogging(options []*LoggerOptions, authNamespace, authIdentity
 
 		for _, opts := range options {
 			prepareAgentOptions(opts)
-			var flag string
-			if opts.LogFile == "-" {
-				flag = opts.LogFile
-			} else {
-				flag = opts.LogPath + opts.LogFile
+			flag := opts.LogFile
+			if flag != "-" && flag != "" {
+				flag = opts.LogPath + "/" + flag
 			}
 
-			if otputChecker[flag] {
+			if !otputChecker[flag] {
 				otputChecker[flag] = true
 			} else {
 				var err error
