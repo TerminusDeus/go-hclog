@@ -33,7 +33,7 @@ var (
 	// auth method type (defined in VA config as type in config.AutoAuth.Method)
 	method string
 	// defined in VA config as log_destination list
-	logDestinations []*LoggerOptions
+	logDestinationOptions []*LoggerOptions
 )
 
 // Default returns a globally held logger. This can be a good starting
@@ -83,12 +83,33 @@ func SetDefault(log Logger) Logger {
 func ConfigureAgentLogging(options []*LoggerOptions, authNamespace, authIdentity, authMethod string) {
 	protect.Do(func() {
 		isAgent = true
-		logDestinations = make([]*LoggerOptions, 0, len(options))
+		logDestinationOptions = make([]*LoggerOptions, 0, len(options))
+		otputChecker := map[string]bool{}
 
 		for _, opts := range options {
-			prepareOptions(opts)
+			prepareAgentOptions(opts)
+			var flag string
+			if opts.LogFile == "-" {
+				flag = opts.LogFile
+			} else {
+				flag = opts.LogPath + opts.LogFile
+			}
 
-			logDestinations = append(logDestinations, opts)
+			if otputChecker[flag] {
+				otputChecker[flag] = true
+			} else {
+				var err error
+
+				if flag == "-" {
+					err = errors.New("Several stdout based log destinations.")
+				} else {
+					err = fmt.Errorf("File based log destinations %s used more than once.", flag)
+				}
+
+				panic(err)
+			}
+
+			logDestinationOptions = append(logDestinationOptions, opts)
 		}
 
 		identity = authIdentity
@@ -97,11 +118,7 @@ func ConfigureAgentLogging(options []*LoggerOptions, authNamespace, authIdentity
 	})
 }
 
-func GetPreconfiguredAgentOptions() []*LoggerOptions {
-	return logDestinations
-}
-
-func prepareOptions(opts *LoggerOptions) {
+func prepareAgentOptions(opts *LoggerOptions) {
 	opts.JSONFormat = opts.LogFormat == "json"
 	opts.Level = LevelFromString(opts.LogLevel)
 
@@ -115,6 +132,7 @@ func prepareOptions(opts *LoggerOptions) {
 				logFileName += fmt.Sprintf("new_log_file_%s", time.Now().String())
 			}
 
+			// TODO: check if this logic is correct
 			f, err := os.Create(logFileName)
 			if err != nil {
 				panic(err)

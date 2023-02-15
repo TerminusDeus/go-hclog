@@ -32,7 +32,7 @@ const TimeFormat = "2006-01-02T15:04:05.000Z0700"
 // This is a version of RFC3339 that contains microsecond precision.
 const TimeFormatJSON = "2006-01-02T15:04:05.000000Z07:00"
 
-const TimeFormatAgent = "2006-01-02 15:04:05.000'z"
+const vaultAgentTimeFormat = "2006-01-02 15:04:05.000'Z"
 
 // errJsonUnsupportedTypeMsg is included in log json entries, if an arg cannot be serialized to json
 const errJsonUnsupportedTypeMsg = "logging contained values that don't serialize to json"
@@ -177,7 +177,7 @@ func newLogger(opts *LoggerOptions) *intLogger {
 
 	if isAgent {
 		l.timeFn = NowWithUTC
-		l.timeFormat = TimeFormatAgent
+		l.timeFormat = vaultAgentTimeFormat
 	}
 
 	l.setColorization(opts)
@@ -221,10 +221,10 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 		return
 	}
 
-	if len(logDestinations) > 0 {
+	if len(logDestinationOptions) > 0 {
 		args = populateAgentArgs(args)
 
-		for _, logDestination := range logDestinations {
+		for _, logDestination := range logDestinationOptions {
 			if logDestination.Level == Trace || int(logDestination.Level) <= int(level) {
 				if logDestination.JSONFormat {
 					l.logJSON(t, name, level, msg, args...)
@@ -239,6 +239,7 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 		}
 	} else {
 		var logLevel Level
+
 		logLevelRaw := strings.ToLower(strings.TrimSpace(os.Getenv("VAULT_LOG_LEVEL")))
 		switch logLevelRaw {
 		case "":
