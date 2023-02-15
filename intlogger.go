@@ -36,6 +36,8 @@ const TimeFormat = "2006-01-02T15:04:05.000Z0700"
 // This is a version of RFC3339 that contains microsecond precision.
 const TimeFormatJSON = "2006-01-02T15:04:05.000000Z07:00"
 
+const TimeFormatAgent = "2006-01-02 15:04:05,000'Z"
+
 // errJsonUnsupportedTypeMsg is included in log json entries, if an arg cannot be serialized to json
 const errJsonUnsupportedTypeMsg = "logging contained values that don't serialize to json"
 
@@ -182,7 +184,7 @@ func newLogger(opts *LoggerOptions) *intLogger {
 
 	if isAgent {
 		l.timeFn = time.Now().UTC
-		l.timeFormat = TimeFormatJSON
+		l.timeFormat = TimeFormatAgent
 	}
 
 	l.setColorization(opts)
@@ -209,6 +211,16 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 	defer l.mutex.Unlock()
 
 	if l.exclude != nil && l.exclude(level, msg, args...) {
+		return
+	}
+
+	if !isAgent {
+		if l.json {
+			l.logJSON(t, name, level, msg, args...)
+		} else {
+			l.logPlain(t, name, level, msg, args...)
+		}
+		l.writer.Flush(level)
 		return
 	}
 
@@ -259,45 +271,35 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 			}
 		}
 	} else {
-		if isAgent {
-			var logLevel Level
-			logLevelRaw := strings.ToLower(strings.TrimSpace(os.Getenv("VAULT_LOG_LEVEL")))
-			switch logLevelRaw {
-			case "":
-				logLevel = DefaultLevel
-			case "trace":
-				logLevel = Trace
-			case "debug":
-				logLevel = Debug
-			case "notice", "info":
-				logLevel = Info
-			case "warn", "warning":
-				logLevel = Warn
-			case "err", "error":
-				logLevel = Error
-			default:
-				// TODO: panic?
-				logLevel = DefaultLevel
-			}
-
-			logFormat := strings.ToLower(strings.TrimSpace(os.Getenv("VAULT_LOG_FORMAT")))
-			l.json = logFormat == "json"
-			if logLevel == Trace || int(logLevel) <= int(level) {
-				if l.json {
-					l.logJSON(t, name, level, msg, args...)
-				} else {
-					l.logPlain(t, name, level, msg, args...)
-				}
-				l.writer.Flush(level)
-			}
+		var logLevel Level
+		logLevelRaw := strings.ToLower(strings.TrimSpace(os.Getenv("VAULT_LOG_LEVEL")))
+		switch logLevelRaw {
+		case "":
+			logLevel = DefaultLevel
+		case "trace":
+			logLevel = Trace
+		case "debug":
+			logLevel = Debug
+		case "notice", "info":
+			logLevel = Info
+		case "warn", "warning":
+			logLevel = Warn
+		case "err", "error":
+			logLevel = Error
+		default:
+			// TODO: panic?
+			logLevel = DefaultLevel
 		}
 
-		if l.json {
-			l.logJSON(t, name, level, msg, args...)
-		} else {
-			l.logPlain(t, name, level, msg, args...)
+		logFormat := strings.ToLower(strings.TrimSpace(os.Getenv("VAULT_LOG_FORMAT")))
+		if logLevel == Trace || int(logLevel) <= int(level) {
+			if logFormat == "json" {
+				l.logJSON(t, name, level, msg, args...)
+			} else {
+				l.logPlain(t, name, level, msg, args...)
+			}
+			l.writer.Flush(level)
 		}
-		l.writer.Flush(level)
 	}
 }
 
