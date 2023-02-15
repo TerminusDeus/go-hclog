@@ -290,13 +290,13 @@ type LoggerOptions struct {
 	// will not affect the parent or sibling loggers.
 	IndependentLevels bool
 
-	// Agent based options
-	LogRotate  string
-	LogMaxSize string
-	LogFile    string
-	LogPath    string
-	LogFormat  string
-	LogLevel   string
+	// vault agent mode specific options
+	LogRotate  string // max simultaneous log files
+	LogMaxSize string // log file size to be triggered for rotation
+	LogFile    string // name of log file
+	LogPath    string // log file should be saved here
+	LogFormat  string // json or plain
+	LogLevel   string // specific logger level
 }
 
 // InterceptLogger describes the interface for using a logger

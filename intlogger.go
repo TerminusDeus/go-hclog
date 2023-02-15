@@ -204,41 +204,48 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 		return
 	}
 
-	if len(AgentOptions) > 0 {
-		hostName, err := os.Hostname()
-		if err == nil {
-			args = append(args, "podhostname", hostName)
+	if len(logDestinations) > 0 {
+		for _, arg := range args {
+			fmt.Printf("||||||| arg: %v\n\n", arg)
 		}
 
-		podNamespaceFilePath := "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
-		buf, err := ioutil.ReadFile(podNamespaceFilePath)
+		hostname, err := os.Hostname()
+		if err == nil {
+			args = append(args, "hostname", hostname)
+		}
+
+		buf, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 		if err == nil {
 			args = append(args, "projectname", string(buf))
 		}
 
-		if role != "" {
-			args = append(args, "role", role)
+		if identity != "" {
+			args = append(args, "identity", identity)
 		}
 
-		if authNamespace != "" {
-			args = append(args, "namespace", authNamespace)
+		if namespace != "" {
+			args = append(args, "namespace", namespace)
 		}
 
-		for _, agentOption := range AgentOptions {
+		if method != "" {
+			args = append(args, "method", method)
+		}
+
+		for _, logDestination := range logDestinations {
 			// fmt.Printf("||||||| Agent option level: %v\n\n", agentOption.Level)
 			// fmt.Printf("||||||| Agent option level int: %v\n\n", int(agentOption.Level))
 			// fmt.Printf("||||||| level: %v\n\n", level)
 			// fmt.Printf("||||||| level int: %v\n\n", int(level)
 
-			if agentOption.Level == Trace || int(agentOption.Level) <= int(level) {
-				if agentOption.JSONFormat {
+			if logDestination.Level == Trace || int(logDestination.Level) <= int(level) {
+				if logDestination.JSONFormat {
 					l.logJSON(t, name, level, msg, args...)
 				} else {
 					l.logPlain(t, name, level, msg, args...)
 				}
 				// fmt.Printf("||||||| string(l.writer.b.Bytes()): ||||||   %s   |||||| \n", string(l.writer.b.Bytes()))
 
-				fmt.Fprintf(agentOption.Output, string(l.writer.b.Bytes()))
+				fmt.Fprintf(logDestination.Output, string(l.writer.b.Bytes()))
 
 				l.writer.b.Reset()
 			}
@@ -692,7 +699,7 @@ func (l intLogger) jsonMapEntry(t time.Time, name string, level Level, msg strin
 		"message": msg,
 	}
 	if !l.disableTime {
-		vals["timestamp"] = t.Format(l.timeFormat)
+		vals["timestamp"] = t.UTC().Format(l.timeFormat)
 	}
 
 	var levelStr string

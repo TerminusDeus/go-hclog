@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -12,12 +13,8 @@ import (
 )
 
 var (
-	AgentOptions []*LoggerOptions
-
-	protect       sync.Once
-	def           Logger
-	role          string
-	authNamespace string
+	protect sync.Once
+	def     Logger
 	// DefaultOptions is used to create the Default logger. These are read
 	// only when the Default logger is created, so set them as soon as the
 	// process starts.
@@ -26,6 +23,16 @@ var (
 		Output: DefaultOutput,
 		TimeFn: time.Now,
 	}
+
+	// vault agent (VA) mode specific settings:
+	// identity (defined in VA config as role in config.AutoAuth.Method)
+	identity string
+	// vault namespace (defined in VA config as namespace in config.AutoAuth.Method)
+	namespace string
+	// auth method type (defined in VA config as type in config.AutoAuth.Method)
+	method string
+	// defined in VA config as log_destination list
+	logDestinations []*LoggerOptions
 )
 
 // Default returns a globally held logger. This can be a good starting
@@ -72,18 +79,24 @@ func SetDefault(log Logger) Logger {
 	return old
 }
 
-func SetAgentOptions(options []*LoggerOptions, aNamespace string, r string) {
-	AgentOptions = make([]*LoggerOptions, 0, len(options))
+func ConfigureAgentLogging(options []*LoggerOptions, authNamespace, authIdentity, authMethod string) {
+	protect.Do(func() {
+		logDestinations = make([]*LoggerOptions, 0, len(options))
 
-	// assumes that several destinations are set
-	for _, opts := range options {
-		prepareOptions(opts)
+		for _, opts := range options {
+			prepareOptions(opts)
 
-		AgentOptions = append(AgentOptions, opts)
-	}
+			logDestinations = append(logDestinations, opts)
+		}
 
-	role = r
-	authNamespace = aNamespace
+		identity = authIdentity
+		namespace = authNamespace
+		method = authMethod
+	})
+}
+
+func GetPreconfiguredAgentOptions() []*LoggerOptions {
+	return logDestinations
 }
 
 func prepareOptions(opts *LoggerOptions) {
@@ -120,26 +133,25 @@ func prepareOptions(opts *LoggerOptions) {
 				logFileMaxSize = int(size)
 			}
 
-			logFileTTLRaw := opts.LogRotate
+			maxBackupsRaw := opts.LogRotate
 
-			var logFileTTL int
+			var maxBackups int
 
-			if logFileTTLRaw != "" {
-				dur, err := parseutil.ParseDurationSecond(logFileTTLRaw)
+			if maxBackupsRaw != "" {
+				maxBackups, err = strconv.Atoi(maxBackupsRaw)
 				if err != nil {
-					panic(errors.New("bad value for log_rotate: " + logFileTTLRaw))
+					panic(errors.New("bad value for log_rotate: " + maxBackupsRaw))
 				}
-
-				logFileTTL = int(dur.Seconds())
 			}
 
 			opts.Output = &lumberjack.Logger{
-				Filename: logFileName,
-				MaxSize:  logFileMaxSize, // bytes
-				MaxAge:   logFileTTL,     // seconds
+				Filename:   logFileName,
+				MaxSize:    logFileMaxSize, // bytes
+				MaxBackups: maxBackups,
 			}
 		}
 	} else {
+		// TODO: check if this logic is stable?
 		opts.Output = os.Stdout
 	}
 }
