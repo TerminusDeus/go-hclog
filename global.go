@@ -101,7 +101,7 @@ func ConfigureAgentLogging(options []*LoggerOptions, authNamespace, authIdentity
 				if flag == "-" {
 					err = errors.New("Several stdout based log destinations.")
 				} else {
-					err = fmt.Errorf("File based log destinations %s used more than once.", flag)
+					err = fmt.Errorf("File %s specified more than once in distinct log destination stanza.", flag)
 				}
 
 				panic(err)
@@ -122,22 +122,6 @@ func prepareAgentOptions(opts *LoggerOptions) {
 
 	if opts.LogFile != "-" {
 		if opts.LogPath != "" {
-			logFileName := opts.LogPath + "/"
-
-			if opts.LogFile != "" {
-				logFileName += opts.LogFile
-			} else {
-				logFileName += fmt.Sprintf("new_log_file_%s", time.Now().String())
-			}
-
-			// TODO: check if this logic is correct
-			f, err := os.Create(logFileName)
-			if err != nil {
-				panic(err)
-			}
-
-			f.Close()
-
 			logFileMaxSizeRaw := opts.LogMaxSize
 
 			var logFileMaxSize int
@@ -145,7 +129,7 @@ func prepareAgentOptions(opts *LoggerOptions) {
 
 				size, err := parseutil.ParseCapacityString(logFileMaxSizeRaw)
 				if err != nil {
-					panic(errors.New("bad value for log_max_size: " + logFileMaxSizeRaw))
+					panic(fmt.Errorf("Bad log_max_size value (%v) caused error: %s", logFileMaxSizeRaw, err.Error()))
 				}
 
 				logFileMaxSize = int(size)
@@ -155,11 +139,20 @@ func prepareAgentOptions(opts *LoggerOptions) {
 
 			var maxBackups int
 
+			var err error
 			if maxBackupsRaw != "" {
 				maxBackups, err = strconv.Atoi(maxBackupsRaw)
 				if err != nil {
-					panic(errors.New("bad value for log_rotate: " + maxBackupsRaw))
+					panic(fmt.Errorf("Bad log_rotate value (%v) caused error: %s", maxBackupsRaw, err.Error()))
 				}
+			}
+
+			logFileName := opts.LogPath + "/"
+
+			if opts.LogFile != "" {
+				logFileName += opts.LogFile
+			} else {
+				panic("log_file value not specified in file based log_destination stanza.")
 			}
 
 			opts.Output = &lumberjack.Logger{
