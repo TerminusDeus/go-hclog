@@ -165,6 +165,7 @@ func newLogger(opts *LoggerOptions) *intLogger {
 		headerColor:       headerColor,
 		fieldColor:        fieldColor,
 	}
+
 	if opts.IncludeLocation {
 		l.callerOffset = offsetIntLogger + opts.AdditionalLocationOffset
 	}
@@ -177,6 +178,11 @@ func newLogger(opts *LoggerOptions) *intLogger {
 	}
 	if opts.TimeFormat != "" {
 		l.timeFormat = opts.TimeFormat
+	}
+
+	if isAgent {
+		l.timeFn = time.Now().UTC
+		l.timeFormat = TimeFormatJSON
 	}
 
 	l.setColorization(opts)
