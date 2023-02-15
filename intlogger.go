@@ -32,7 +32,7 @@ const TimeFormat = "2006-01-02T15:04:05.000Z0700"
 // This is a version of RFC3339 that contains microsecond precision.
 const TimeFormatJSON = "2006-01-02T15:04:05.000000Z07:00"
 
-const TimeFormatAgent = "2006-01-02 15:04:05.123'z"
+const TimeFormatAgent = "2006-01-02 15:04:05.000'z"
 
 // errJsonUnsupportedTypeMsg is included in log json entries, if an arg cannot be serialized to json
 const errJsonUnsupportedTypeMsg = "logging contained values that don't serialize to json"
