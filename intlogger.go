@@ -97,7 +97,9 @@ type intLogger struct {
 func New(opts *LoggerOptions) Logger {
 	// fmt.Printf("|||| New opts = %+v\n", opts)
 	// opts.Level = LevelFromString(opts.LogLevel)
-	opts.Level = Trace
+	if isAgent {
+		opts.Level = Trace
+	}
 	// prepareOptions(opts)
 
 	return newLogger(opts)
@@ -251,6 +253,39 @@ func (l *intLogger) log(name string, level Level, msg string, args ...interface{
 			}
 		}
 	} else {
+		if isAgent {
+			var logLevel Level
+			logLevelRaw := strings.ToLower(strings.TrimSpace(os.Getenv("VAULT_LOG_LEVEL")))
+			switch logLevelRaw {
+			case "":
+				logLevel = DefaultLevel
+			case "trace":
+				logLevel = Trace
+			case "debug":
+				logLevel = Debug
+			case "notice", "info":
+				logLevel = Info
+			case "warn", "warning":
+				logLevel = Warn
+			case "err", "error":
+				logLevel = Error
+			default:
+				// TODO: panic?
+				logLevel = DefaultLevel
+			}
+
+			logFormat := strings.ToLower(strings.TrimSpace(os.Getenv("VAULT_LOG_FORMAT")))
+			l.json = logFormat == "json"
+			if logLevel == Trace || int(logLevel) <= int(level) {
+				if l.json {
+					l.logJSON(t, name, level, msg, args...)
+				} else {
+					l.logPlain(t, name, level, msg, args...)
+				}
+				l.writer.Flush(level)
+			}
+		}
+
 		if l.json {
 			l.logJSON(t, name, level, msg, args...)
 		} else {

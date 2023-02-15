@@ -25,6 +25,7 @@ var (
 	}
 
 	// vault agent (VA) mode specific settings:
+	isAgent bool
 	// identity (defined in VA config as role in config.AutoAuth.Method)
 	identity string
 	// vault namespace (defined in VA config as namespace in config.AutoAuth.Method)
@@ -81,6 +82,7 @@ func SetDefault(log Logger) Logger {
 
 func ConfigureAgentLogging(options []*LoggerOptions, authNamespace, authIdentity, authMethod string) {
 	protect.Do(func() {
+		isAgent = true
 		logDestinations = make([]*LoggerOptions, 0, len(options))
 
 		for _, opts := range options {
